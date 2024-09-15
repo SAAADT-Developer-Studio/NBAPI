@@ -68,5 +68,7 @@ watch:
             fi; \
         fi
 
+sqlc:
+	sqlc generate
 
 .PHONY: all build run test clean watch
