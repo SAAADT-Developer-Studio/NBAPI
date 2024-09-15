@@ -1,0 +1,98 @@
+season,lg,team,playoffs,abbreviation
+2024,NBA,Atlanta Hawks,FALSE,ATL
+2024,NBA,Boston Celtics,TRUE,BOS
+2024,NBA,Brooklyn Nets,FALSE,BRK
+2024,NBA,Charlotte Hornets,FALSE,CHO
+2024,NBA,Chicago Bulls,FALSE,CHI
+2024,NBA,Cleveland Cavaliers,FALSE,CLE
+2024,NBA,Dallas Mavericks,TRUE,DAL
+2024,NBA,Denver Nuggets,TRUE,DEN
+2024,NBA,Detroit Pistons,FALSE,DET
+2024,NBA,Golden State Warriors,FALSE,GSW
+2024,NBA,Houston Rockets,FALSE,HOU
+2024,NBA,Indiana Pacers,FALSE,IND
+2024,NBA,Los Angeles Clippers,TRUE,LAC
+2024,NBA,Los Angeles Lakers,FALSE,LAL
+2024,NBA,Memphis Grizzlies,FALSE,MEM
+2024,NBA,Miami Heat,FALSE,MIA
+2024,NBA,Milwaukee Bucks,TRUE,MIL
+2024,NBA,Minnesota Timberwolves,TRUE,MIN
+2024,NBA,New Orleans Pelicans,FALSE,NOP
+2024,NBA,New York Knicks,FALSE,NYK
+2024,NBA,Oklahoma City Thunder,TRUE,OKC
+2024,NBA,Orlando Magic,FALSE,ORL
+2024,NBA,Philadelphia 76ers,FALSE,PHI
+2024,NBA,Phoenix Suns,FALSE,PHO
+2024,NBA,Portland Trail Blazers,FALSE,POR
+2024,NBA,Sacramento Kings,FALSE,SAC
+2024,NBA,San Antonio Spurs,FALSE,SAS
+2024,NBA,Toronto Raptors,FALSE,TOR
+2024,NBA,Utah Jazz,FALSE,UTA
+2024,NBA,Washington Wizards,FALSE,WAS
+2020,NBA,League Average,FALSE,NA
+2014,NBA,Charlotte Bobcats,TRUE,CHA
+2013,NBA,New Orleans Hornets,FALSE,NOH
+2012,NBA,New Jersey Nets,FALSE,NJN
+2008,NBA,Seattle SuperSonics,FALSE,SEA
+2007,NBA,New Orleans/Oklahoma City Hornets,FALSE,NOK
+2001,NBA,Vancouver Grizzlies,FALSE,VAN
+1997,NBA,Washington Bullets,TRUE,WSB
+1985,NBA,Kansas City Kings,FALSE,KCK
+1984,NBA,San Diego Clippers,FALSE,SDC
+1979,NBA,New Orleans Jazz,FALSE,NOJ
+1978,NBA,Buffalo Braves,FALSE,BUF
+1977,NBA,New York Nets,FALSE,NYN
+1976,ABA,Kentucky Colonels,TRUE,KEN
+1976,ABA,San Diego Sails,FALSE,SDS
+1976,ABA,Spirits of St. Louis,FALSE,SSL
+1976,ABA,Utah Stars,FALSE,UTS
+1976,ABA,Virginia Squires,FALSE,VIR
+1975,NBA,Kansas City-Omaha Kings,TRUE,KCO
+1975,ABA,Memphis Sounds,TRUE,MMS
+1975,ABA,San Diego Conquistadors,FALSE,SDA
+1974,NBA,Capital Bullets,TRUE,CAP
+1974,ABA,Carolina Cougars,TRUE,CAR
+1974,ABA,Denver Rockets,TRUE,DNR
+1974,ABA,Memphis Tams,FALSE,MMT
+1973,NBA,Baltimore Bullets,TRUE,BAL
+1973,ABA,Dallas Chaparrals,FALSE,DLC
+1972,NBA,Cincinnati Royals,FALSE,CIN
+1972,ABA,Memphis Pros,FALSE,MMP
+1972,ABA,Pittsburgh Condors,FALSE,PTC
+1972,ABA,The Floridians,TRUE,FLO
+1971,NBA,San Diego Rockets,FALSE,SDR
+1971,NBA,San Francisco Warriors,TRUE,SFW
+1971,ABA,Texas Chaparrals,TRUE,TEX
+1970,ABA,Los Angeles Stars,TRUE,LAS
+1970,ABA,Miami Floridians,FALSE,MMF
+1970,ABA,New Orleans Buccaneers,FALSE,NOB
+1970,ABA,Pittsburgh Pipers,FALSE,PTP
+1970,ABA,Washington Capitols,TRUE,WSA
+1969,ABA,Houston Mavericks,FALSE,HSM
+1969,ABA,Minnesota Pipers,TRUE,MNP
+1969,ABA,Oakland Oaks,TRUE,OAK
+1968,ABA,Anaheim Amigos,FALSE,ANA
+1968,ABA,Minnesota Muskies,TRUE,MNM
+1968,ABA,New Jersey Americans,FALSE,NJA
+1968,NBA,St. Louis Hawks,TRUE,STL
+1963,NBA,Chicago Zephyrs,FALSE,CHZ
+1963,NBA,Syracuse Nationals,TRUE,SYR
+1962,NBA,Chicago Packers,FALSE,CHP
+1962,NBA,Philadelphia Warriors,TRUE,PHW
+1960,NBA,Minneapolis Lakers,TRUE,MNL
+1957,NBA,Fort Wayne Pistons,TRUE,FTW
+1957,NBA,Rochester Royals,FALSE,ROC
+1955,NBA,Milwaukee Hawks,FALSE,MLH
+1953,NBA,Indianapolis Olympians,TRUE,INO
+1951,NBA,Tri-Cities Blackhawks,FALSE,TRI
+1950,NBA,Anderson Packers,TRUE,AND
+1950,NBA,Chicago Stags,TRUE,CHS
+1950,NBA,Sheboygan Red Skins,TRUE,SHE
+1950,NBA,St. Louis Bombers,FALSE,STB
+1950,NBA,Waterloo Hawks,FALSE,WAT
+1949,BAA,Indianapolis Jets,FALSE,INJ
+1949,BAA,Providence Steamrollers,FALSE,PRO
+1947,BAA,Cleveland Rebels,TRUE,CLR
+1947,BAA,Detroit Falcons,FALSE,DTF
+1947,BAA,Pittsburgh Ironmen,FALSE,PIT
+1947,BAA,Toronto Huskies,FALSE,TRH

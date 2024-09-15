@@ -73,6 +73,7 @@ sqlc:
 
 seed-local:
 	@PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -f data/schema.sql
+	@PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -f data/dumps/seed.sql
 
 seed-prod:
 	@echo "TODO"
