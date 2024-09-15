@@ -69,15 +69,12 @@ watch:
         fi
 
 sqlc:
-	sqlc generate
+	@sqlc generate
 
 seed-local:
-	PGPASSWORD=test psql -h localhost -p 5432 -d nbapidb -U marko -f data/yourseedfile.sql
-
-db-reset:
- echo "TODO"
+	@PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -f data/schema.sql
 
 seed-prod:
-	echo "TODO"
+	@echo "TODO"
 
 .PHONY: all build run test clean watch

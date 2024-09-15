@@ -1,3 +1,7 @@
+DROP SCHEMA IF EXISTS postgres CASCADE;
+
+CREATE SCHEMA postgres;
+
 CREATE TABLE player (
     id INT PRIMARY KEY,
     fullName VARCHAR(100) NOT NULL

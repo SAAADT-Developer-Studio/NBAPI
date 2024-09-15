@@ -9,227 +9,227 @@ import (
 )
 
 type Advanced struct {
-	ID         int32
-	Per        float32
-	TsPercent  float32
-	_3pAr      float32
-	FTr        float32
-	OrbPercent float32
-	DrbPercent float32
-	TrbPercent float32
-	AstPercent float32
-	StlPercent float32
-	BlkPercent float32
-	TovPercent float32
-	UsgPercent float32
-	Ows        float32
-	Dws        float32
-	Ws         float32
-	Ws48       float32
-	Obpm       float32
-	Dbpm       float32
-	Bpm        float32
-	Vorp       float32
+	ID         int32   `json:"id"`
+	Per        float32 `json:"per"`
+	TsPercent  float32 `json:"ts_percent"`
+	_3pAr      float32 `json:"3p_ar"`
+	FTr        float32 `json:"f_tr"`
+	OrbPercent float32 `json:"orb_percent"`
+	DrbPercent float32 `json:"drb_percent"`
+	TrbPercent float32 `json:"trb_percent"`
+	AstPercent float32 `json:"ast_percent"`
+	StlPercent float32 `json:"stl_percent"`
+	BlkPercent float32 `json:"blk_percent"`
+	TovPercent float32 `json:"tov_percent"`
+	UsgPercent float32 `json:"usg_percent"`
+	Ows        float32 `json:"ows"`
+	Dws        float32 `json:"dws"`
+	Ws         float32 `json:"ws"`
+	Ws48       float32 `json:"ws48"`
+	Obpm       float32 `json:"obpm"`
+	Dbpm       float32 `json:"dbpm"`
+	Bpm        float32 `json:"bpm"`
+	Vorp       float32 `json:"vorp"`
 }
 
 type AllStar struct {
-	PlayerID   int32
-	SeasonYear int32
-	Teamname   pgtype.Text
-	Replaced   pgtype.Bool
+	PlayerID   int32       `json:"player_id"`
+	SeasonYear int32       `json:"season_year"`
+	Teamname   pgtype.Text `json:"teamname"`
+	Replaced   pgtype.Bool `json:"replaced"`
 }
 
 type AllTeam struct {
-	PlayerID   int32
-	SeasonYear int32
-	Type       string
-	TeamNumber string
+	PlayerID   int32  `json:"player_id"`
+	SeasonYear int32  `json:"season_year"`
+	Type       string `json:"type"`
+	TeamNumber string `json:"team_number"`
 }
 
 type AllTeamsVoting struct {
-	PlayerID   int32
-	SeasonYear int32
-	TeamID     int32
-	PtsWon     int32
-	PtsMax     int32
-	Share      float32
-	_1stTeam   int32
-	_2ndTeam   int32
-	_3rdTeam   int32
-	Type       string
+	PlayerID   int32   `json:"player_id"`
+	SeasonYear int32   `json:"season_year"`
+	TeamID     int32   `json:"team_id"`
+	PtsWon     int32   `json:"pts_won"`
+	PtsMax     int32   `json:"pts_max"`
+	Share      float32 `json:"share"`
+	_1stTeam   int32   `json:"1st_team"`
+	_2ndTeam   int32   `json:"2nd_team"`
+	_3rdTeam   int32   `json:"3rd_team"`
+	Type       string  `json:"type"`
 }
 
 type OpponentsPer100Possesion struct {
-	TeamID     int32
-	Per100ID   int32
-	SeasonYear int32
+	TeamID     int32 `json:"team_id"`
+	Per100ID   int32 `json:"per_100_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type OpponentsPerGame struct {
-	TeamID     int32
-	PerGameID  int32
-	SeasonYear int32
+	TeamID     int32 `json:"team_id"`
+	PerGameID  int32 `json:"per_game_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type OpponentsTotal struct {
-	TeamID     int32
-	TotalID    int32
-	SeasonYear int32
+	TeamID     int32 `json:"team_id"`
+	TotalID    int32 `json:"total_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type Per100Possesion struct {
-	ID   int32
-	Fg   float32
-	Fga  float32
-	_3p  int32
-	_3pa int32
-	_2p  int32
-	_2pa int32
-	Ft   float32
-	Fta  float32
-	Orb  float32
-	Drb  float32
-	Trb  float32
-	Stl  float32
-	Blk  float32
-	Ast  float32
-	Tov  float32
-	Pf   float32
-	Pts  float32
-	ORtg float32
-	DRtg float32
+	ID   int32   `json:"id"`
+	Fg   float32 `json:"fg"`
+	Fga  float32 `json:"fga"`
+	_3p  int32   `json:"3p"`
+	_3pa int32   `json:"3pa"`
+	_2p  int32   `json:"2p"`
+	_2pa int32   `json:"2pa"`
+	Ft   float32 `json:"ft"`
+	Fta  float32 `json:"fta"`
+	Orb  float32 `json:"orb"`
+	Drb  float32 `json:"drb"`
+	Trb  float32 `json:"trb"`
+	Stl  float32 `json:"stl"`
+	Blk  float32 `json:"blk"`
+	Ast  float32 `json:"ast"`
+	Tov  float32 `json:"tov"`
+	Pf   float32 `json:"pf"`
+	Pts  float32 `json:"pts"`
+	ORtg float32 `json:"o_rtg"`
+	DRtg float32 `json:"d_rtg"`
 }
 
 type Per36 struct {
-	PlayerID   int32
-	SeasonYear int32
-	Fg         float32
-	Fga        float32
-	_3p        float32
-	_3pa       float32
-	_2p        float32
-	_2pa       float32
-	Ft         float32
-	Fta        float32
-	Orb        float32
-	Drb        float32
-	Trb        float32
-	Stl        float32
-	Blk        float32
-	Ast        float32
-	Tov        float32
-	Pf         float32
-	Pts        float32
+	PlayerID   int32   `json:"player_id"`
+	SeasonYear int32   `json:"season_year"`
+	Fg         float32 `json:"fg"`
+	Fga        float32 `json:"fga"`
+	_3p        float32 `json:"3p"`
+	_3pa       float32 `json:"3pa"`
+	_2p        float32 `json:"2p"`
+	_2pa       float32 `json:"2pa"`
+	Ft         float32 `json:"ft"`
+	Fta        float32 `json:"fta"`
+	Orb        float32 `json:"orb"`
+	Drb        float32 `json:"drb"`
+	Trb        float32 `json:"trb"`
+	Stl        float32 `json:"stl"`
+	Blk        float32 `json:"blk"`
+	Ast        float32 `json:"ast"`
+	Tov        float32 `json:"tov"`
+	Pf         float32 `json:"pf"`
+	Pts        float32 `json:"pts"`
 }
 
 type PerGame struct {
-	ID         int32
-	Fg         float32
-	Fga        float32
-	_3p        int32
-	_3pa       int32
-	_2p        int32
-	_2pa       int32
-	Ft         float32
-	Fta        float32
-	Orb        float32
-	Drb        float32
-	Trb        float32
-	Stl        float32
-	Blk        float32
-	Ast        float32
-	Tov        float32
-	Pf         float32
-	Pts        float32
-	Mp         float32
-	FgPercent  float32
-	_2pPercent float32
-	_3pPercent float32
-	EfgPercent float32
+	ID         int32   `json:"id"`
+	Fg         float32 `json:"fg"`
+	Fga        float32 `json:"fga"`
+	_3p        int32   `json:"3p"`
+	_3pa       int32   `json:"3pa"`
+	_2p        int32   `json:"2p"`
+	_2pa       int32   `json:"2pa"`
+	Ft         float32 `json:"ft"`
+	Fta        float32 `json:"fta"`
+	Orb        float32 `json:"orb"`
+	Drb        float32 `json:"drb"`
+	Trb        float32 `json:"trb"`
+	Stl        float32 `json:"stl"`
+	Blk        float32 `json:"blk"`
+	Ast        float32 `json:"ast"`
+	Tov        float32 `json:"tov"`
+	Pf         float32 `json:"pf"`
+	Pts        float32 `json:"pts"`
+	Mp         float32 `json:"mp"`
+	FgPercent  float32 `json:"fg_percent"`
+	_2pPercent float32 `json:"2p_percent"`
+	_3pPercent float32 `json:"3p_percent"`
+	EfgPercent float32 `json:"efg_percent"`
 }
 
 type Player struct {
-	ID       int32
-	Fullname string
+	ID       int32  `json:"id"`
+	Fullname string `json:"fullname"`
 }
 
 type PlayerAdvanced struct {
-	PlayerID   int32
-	AdvancedID int32
-	SeasonYear int32
+	PlayerID   int32 `json:"player_id"`
+	AdvancedID int32 `json:"advanced_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type PlayerPer100Possesion struct {
-	PlayerID   int32
-	Per100ID   int32
-	SeasonYear int32
+	PlayerID   int32 `json:"player_id"`
+	Per100ID   int32 `json:"per_100_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type PlayerPerGame struct {
-	PlayerID   int32
-	PerGameID  int32
-	SeasonYear int32
+	PlayerID   int32 `json:"player_id"`
+	PerGameID  int32 `json:"per_game_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type PlayerTeam struct {
-	PlayerID   int32
-	TeamID     int32
-	SeasonYear int32
-	Age        int32
-	Experience int32
-	Position   string
+	PlayerID   int32  `json:"player_id"`
+	TeamID     int32  `json:"team_id"`
+	SeasonYear int32  `json:"season_year"`
+	Age        int32  `json:"age"`
+	Experience int32  `json:"experience"`
+	Position   string `json:"position"`
 }
 
 type PlayerTotal struct {
-	PlayerID   int32
-	TotalID    int32
-	SeasonYear int32
+	PlayerID   int32 `json:"player_id"`
+	TotalID    int32 `json:"total_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type Team struct {
-	ID       int32
-	Fullname string
-	Abbr     string
+	ID       int32  `json:"id"`
+	Fullname string `json:"fullname"`
+	Abbr     string `json:"abbr"`
 }
 
 type TeamPer100Possesion struct {
-	TeamID     int32
-	Per100ID   int32
-	SeasonYear int32
+	TeamID     int32 `json:"team_id"`
+	Per100ID   int32 `json:"per_100_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type TeamPerGame struct {
-	TeamID     int32
-	PerGameID  int32
-	SeasonYear int32
+	TeamID     int32 `json:"team_id"`
+	PerGameID  int32 `json:"per_game_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type TeamTotal struct {
-	TeamID     int32
-	TotalID    int32
-	SeasonYear int32
+	TeamID     int32 `json:"team_id"`
+	TotalID    int32 `json:"total_id"`
+	SeasonYear int32 `json:"season_year"`
 }
 
 type Total struct {
-	ID   int32
-	Gp   int32
-	Gs   pgtype.Int4
-	Mp   int32
-	Fg   int32
-	Fga  int32
-	_3p  int32
-	_3pa int32
-	_2p  int32
-	_2pa int32
-	Ft   int32
-	Fta  int32
-	Orb  int32
-	Drb  int32
-	Trb  int32
-	Stl  int32
-	Blk  int32
-	Ast  int32
-	Tov  int32
-	Pf   int32
-	Pts  int32
+	ID   int32       `json:"id"`
+	Gp   int32       `json:"gp"`
+	Gs   pgtype.Int4 `json:"gs"`
+	Mp   int32       `json:"mp"`
+	Fg   int32       `json:"fg"`
+	Fga  int32       `json:"fga"`
+	_3p  int32       `json:"3p"`
+	_3pa int32       `json:"3pa"`
+	_2p  int32       `json:"2p"`
+	_2pa int32       `json:"2pa"`
+	Ft   int32       `json:"ft"`
+	Fta  int32       `json:"fta"`
+	Orb  int32       `json:"orb"`
+	Drb  int32       `json:"drb"`
+	Trb  int32       `json:"trb"`
+	Stl  int32       `json:"stl"`
+	Blk  int32       `json:"blk"`
+	Ast  int32       `json:"ast"`
+	Tov  int32       `json:"tov"`
+	Pf   int32       `json:"pf"`
+	Pts  int32       `json:"pts"`
 }
