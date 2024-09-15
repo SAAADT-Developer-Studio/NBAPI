@@ -67,16 +67,13 @@ func TestMain(m *testing.M) {
 }
 
 func TestNew(t *testing.T) {
-	srv := New()
-	if srv == nil {
-		t.Fatal("New() returned nil")
-	}
+	Init()
 }
 
 func TestHealth(t *testing.T) {
-	srv := New()
+	Init()
 
-	stats := srv.Health()
+	stats := Health()
 
 	if stats["status"] != "up" {
 		t.Fatalf("expected status to be up, got %s", stats["status"])
@@ -92,7 +89,7 @@ func TestHealth(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	srv := New()
+	Init()
 
-	srv.Close()
+	Close()
 }

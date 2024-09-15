@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const getPlayer = `-- name: GetPlayer :one
+select id, fullname from player where id = $1
+`
+
+func (q *Queries) GetPlayer(ctx context.Context, id int32) (Player, error) {
+	row := q.db.QueryRow(ctx, getPlayer, id)
+	var i Player
+	err := row.Scan(&i.ID, &i.Fullname)
+	return i, err
+}
+
 const getPlayers = `-- name: GetPlayers :many
 select id, fullname from player
 `

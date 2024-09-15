@@ -1,6 +1,7 @@
 package server
 
 import (
+	"NBAPI/internal/database"
 	"fmt"
 	"net/http"
 	"os"
@@ -8,23 +9,18 @@ import (
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
-
-	"NBAPI/internal/database"
 )
 
 type Server struct {
 	port int
-
-	db database.Service
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
 		port: port,
-
-		db: database.New(),
 	}
+	database.Init()
 
 	// Declare Server config
 	server := &http.Server{
