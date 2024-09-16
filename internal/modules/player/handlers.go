@@ -2,25 +2,35 @@ package player
 
 import (
 	"NBAPI/internal/database"
+	"NBAPI/internal/sqlc"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func PlayersHandler(w http.ResponseWriter, r *http.Request) {
-	players, err := database.Queries.GetPlayers(r.Context())
+	search := r.URL.Query().Get("search")
+	var players []sqlc.Player
+	var err error
+	
+	if len(search) == 0 {
+		players, err = database.Queries.GetPlayers(r.Context())
+	} else {
+		players, err = database.Queries.GetPlayerBySearch(r.Context(), pgtype.Text{String: search})
+	}
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error fetching players"))
 		return
 	}
-	render.JSON(w, r, players)
+		render.JSON(w, r, players)
 }
 
 func PlayerHandler(w http.ResponseWriter, r *http.Request) {
