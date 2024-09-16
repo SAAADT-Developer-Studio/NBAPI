@@ -12,7 +12,7 @@ type Advanced struct {
 	ID         int32   `json:"id"`
 	Per        float32 `json:"per"`
 	TsPercent  float32 `json:"ts_percent"`
-	_3pAr      float32 `json:"3p_ar"`
+	PAr3       float32 `json:"p_ar3"`
 	FTr        float32 `json:"f_tr"`
 	OrbPercent float32 `json:"orb_percent"`
 	DrbPercent float32 `json:"drb_percent"`
@@ -33,10 +33,10 @@ type Advanced struct {
 }
 
 type AllStar struct {
-	PlayerID   int32       `json:"player_id"`
-	SeasonYear int32       `json:"season_year"`
-	Teamname   pgtype.Text `json:"teamname"`
-	Replaced   pgtype.Bool `json:"replaced"`
+	Playerfullname string      `json:"playerfullname"`
+	SeasonYear     int32       `json:"season_year"`
+	Teamname       pgtype.Text `json:"teamname"`
+	Replaced       pgtype.Bool `json:"replaced"`
 }
 
 type AllTeam struct {
@@ -49,55 +49,54 @@ type AllTeam struct {
 type AllTeamsVoting struct {
 	PlayerID   int32   `json:"player_id"`
 	SeasonYear int32   `json:"season_year"`
-	TeamID     int32   `json:"team_id"`
+	Type       string  `json:"type"`
 	PtsWon     int32   `json:"pts_won"`
 	PtsMax     int32   `json:"pts_max"`
 	Share      float32 `json:"share"`
-	_1stTeam   int32   `json:"1st_team"`
-	_2ndTeam   int32   `json:"2nd_team"`
-	_3rdTeam   int32   `json:"3rd_team"`
-	Type       string  `json:"type"`
+	FirstTeam  int32   `json:"first_team"`
+	SecondTeam int32   `json:"second_team"`
+	ThirdTeam  int32   `json:"third_team"`
 }
 
 type OpponentsPer100Possesion struct {
-	TeamID     int32 `json:"team_id"`
-	Per100ID   int32 `json:"per_100_id"`
-	SeasonYear int32 `json:"season_year"`
+	TeamAbbr   string `json:"team_abbr"`
+	Per100ID   int32  `json:"per_100_id"`
+	SeasonYear int32  `json:"season_year"`
 }
 
 type OpponentsPerGame struct {
-	TeamID     int32 `json:"team_id"`
-	PerGameID  int32 `json:"per_game_id"`
-	SeasonYear int32 `json:"season_year"`
+	TeamAbbr   string `json:"team_abbr"`
+	PerGameID  int32  `json:"per_game_id"`
+	SeasonYear int32  `json:"season_year"`
 }
 
 type OpponentsTotal struct {
-	TeamID     int32 `json:"team_id"`
-	TotalID    int32 `json:"total_id"`
-	SeasonYear int32 `json:"season_year"`
+	TeamAbbr   string `json:"team_abbr"`
+	TotalID    int32  `json:"total_id"`
+	SeasonYear int32  `json:"season_year"`
 }
 
 type Per100Possesion struct {
-	ID   int32   `json:"id"`
-	Fg   float32 `json:"fg"`
-	Fga  float32 `json:"fga"`
-	_3p  int32   `json:"3p"`
-	_3pa int32   `json:"3pa"`
-	_2p  int32   `json:"2p"`
-	_2pa int32   `json:"2pa"`
-	Ft   float32 `json:"ft"`
-	Fta  float32 `json:"fta"`
-	Orb  float32 `json:"orb"`
-	Drb  float32 `json:"drb"`
-	Trb  float32 `json:"trb"`
-	Stl  float32 `json:"stl"`
-	Blk  float32 `json:"blk"`
-	Ast  float32 `json:"ast"`
-	Tov  float32 `json:"tov"`
-	Pf   float32 `json:"pf"`
-	Pts  float32 `json:"pts"`
-	ORtg float32 `json:"o_rtg"`
-	DRtg float32 `json:"d_rtg"`
+	ID   int32         `json:"id"`
+	Fg   float32       `json:"fg"`
+	Fga  float32       `json:"fga"`
+	P3   int32         `json:"p3"`
+	Pa3  int32         `json:"pa3"`
+	P2   int32         `json:"p2"`
+	Pa2  int32         `json:"pa2"`
+	Ft   float32       `json:"ft"`
+	Fta  float32       `json:"fta"`
+	Orb  float32       `json:"orb"`
+	Drb  float32       `json:"drb"`
+	Trb  float32       `json:"trb"`
+	Stl  float32       `json:"stl"`
+	Blk  float32       `json:"blk"`
+	Ast  float32       `json:"ast"`
+	Tov  float32       `json:"tov"`
+	Pf   float32       `json:"pf"`
+	Pts  float32       `json:"pts"`
+	ORtg pgtype.Float4 `json:"o_rtg"`
+	DRtg pgtype.Float4 `json:"d_rtg"`
 }
 
 type Per36 struct {
@@ -105,10 +104,10 @@ type Per36 struct {
 	SeasonYear int32   `json:"season_year"`
 	Fg         float32 `json:"fg"`
 	Fga        float32 `json:"fga"`
-	_3p        float32 `json:"3p"`
-	_3pa       float32 `json:"3pa"`
-	_2p        float32 `json:"2p"`
-	_2pa       float32 `json:"2pa"`
+	P3         int32   `json:"p3"`
+	Pa3        int32   `json:"pa3"`
+	P2         int32   `json:"p2"`
+	Pa2        int32   `json:"pa2"`
 	Ft         float32 `json:"ft"`
 	Fta        float32 `json:"fta"`
 	Orb        float32 `json:"orb"`
@@ -124,28 +123,29 @@ type Per36 struct {
 
 type PerGame struct {
 	ID         int32   `json:"id"`
+	Mp         float32 `json:"mp"`
 	Fg         float32 `json:"fg"`
 	Fga        float32 `json:"fga"`
-	_3p        int32   `json:"3p"`
-	_3pa       int32   `json:"3pa"`
-	_2p        int32   `json:"2p"`
-	_2pa       int32   `json:"2pa"`
+	FgPercent  float32 `json:"fg_percent"`
+	P3         int32   `json:"p3"`
+	Pa3        int32   `json:"pa3"`
+	PPercent3  float32 `json:"p_percent3"`
+	P2         int32   `json:"p2"`
+	Pa2        int32   `json:"pa2"`
+	PPercent2  float32 `json:"p_percent2"`
+	EfgPercent float32 `json:"efg_percent"`
 	Ft         float32 `json:"ft"`
 	Fta        float32 `json:"fta"`
+	FtPercent  float32 `json:"ft_percent"`
 	Orb        float32 `json:"orb"`
 	Drb        float32 `json:"drb"`
 	Trb        float32 `json:"trb"`
+	Ast        float32 `json:"ast"`
 	Stl        float32 `json:"stl"`
 	Blk        float32 `json:"blk"`
-	Ast        float32 `json:"ast"`
 	Tov        float32 `json:"tov"`
 	Pf         float32 `json:"pf"`
 	Pts        float32 `json:"pts"`
-	Mp         float32 `json:"mp"`
-	FgPercent  float32 `json:"fg_percent"`
-	_2pPercent float32 `json:"2p_percent"`
-	_3pPercent float32 `json:"3p_percent"`
-	EfgPercent float32 `json:"efg_percent"`
 }
 
 type Player struct {
@@ -157,6 +157,16 @@ type PlayerAdvanced struct {
 	PlayerID   int32 `json:"player_id"`
 	AdvancedID int32 `json:"advanced_id"`
 	SeasonYear int32 `json:"season_year"`
+}
+
+type PlayerAward struct {
+	PlayerID   int32   `json:"player_id"`
+	SeasonYear int32   `json:"season_year"`
+	Award      string  `json:"award"`
+	PtsWon     int32   `json:"pts_won"`
+	PtsMax     int32   `json:"pts_max"`
+	Share      float32 `json:"share"`
+	Winner     bool    `json:"winner"`
 }
 
 type PlayerPer100Possesion struct {
@@ -171,9 +181,35 @@ type PlayerPerGame struct {
 	SeasonYear int32 `json:"season_year"`
 }
 
+type PlayerShooting struct {
+	SeasonYear              int32   `json:"season_year"`
+	PlayerID                int32   `json:"player_id"`
+	AvgDistFga              float32 `json:"avg_dist_fga"`
+	PercentFgaFrom2pRange   float32 `json:"percent_fga_from_2p_range"`
+	PercentFgaFrom03Range   float32 `json:"percent_fga_from_0_3_range"`
+	PercentFgaFrom310Range  float32 `json:"percent_fga_from_3_10_range"`
+	PercentFgaFrom1016Range float32 `json:"percent_fga_from_10_16_range"`
+	PercentFgaFrom163pRange float32 `json:"percent_fga_from_16_3p_range"`
+	PercentFgaFrom3pRange   float32 `json:"percent_fga_from_3p_range"`
+	FgPercentFrom2pRange    float32 `json:"fg_percent_from_2p_range"`
+	FgPercentFrom03Range    float32 `json:"fg_percent_from_0_3_range"`
+	FgPercentFrom310Range   float32 `json:"fg_percent_from_3_10_range"`
+	FgPercentFrom1016Range  float32 `json:"fg_percent_from_10_16_range"`
+	FgPercentFrom163pRange  float32 `json:"fg_percent_from_16_3p_range"`
+	FgPercentFrom3pRange    float32 `json:"fg_percent_from_3p_range"`
+	PercentAssisted2pFg     float32 `json:"percent_assisted_2p_fg"`
+	PercentAssisted3pFg     float32 `json:"percent_assisted_3p_fg"`
+	PercentDunksOfFga       float32 `json:"percent_dunks_of_fga"`
+	NumOfDunks              float32 `json:"num_of_dunks"`
+	PercentCorner3sOf3pa    float32 `json:"percent_corner_3s_of_3pa"`
+	Corner3PointPercent     float32 `json:"corner_3_point_percent"`
+	NumHeavesAttempted      int32   `json:"num_heaves_attempted"`
+	NumHeavesMade           int32   `json:"num_heaves_made"`
+}
+
 type PlayerTeam struct {
+	TeamAbbr   string `json:"team_abbr"`
 	PlayerID   int32  `json:"player_id"`
-	TeamID     int32  `json:"team_id"`
 	SeasonYear int32  `json:"season_year"`
 	Age        int32  `json:"age"`
 	Experience int32  `json:"experience"`
@@ -187,49 +223,80 @@ type PlayerTotal struct {
 }
 
 type Team struct {
-	ID       int32  `json:"id"`
-	Fullname string `json:"fullname"`
 	Abbr     string `json:"abbr"`
+	Fullname string `json:"fullname"`
 }
 
 type TeamPer100Possesion struct {
-	TeamID     int32 `json:"team_id"`
-	Per100ID   int32 `json:"per_100_id"`
-	SeasonYear int32 `json:"season_year"`
+	TeamAbbr   string `json:"team_abbr"`
+	Per100ID   int32  `json:"per_100_id"`
+	SeasonYear int32  `json:"season_year"`
 }
 
 type TeamPerGame struct {
-	TeamID     int32 `json:"team_id"`
-	PerGameID  int32 `json:"per_game_id"`
-	SeasonYear int32 `json:"season_year"`
+	TeamAbbr   string `json:"team_abbr"`
+	PerGameID  int32  `json:"per_game_id"`
+	SeasonYear int32  `json:"season_year"`
+}
+
+type TeamSeason struct {
+	SeasonYear    int32   `json:"season_year"`
+	TeamAbbr      string  `json:"team_abbr"`
+	Playoffs      bool    `json:"playoffs"`
+	AvarageAge    float32 `json:"avarage_age"`
+	W             int32   `json:"w"`
+	L             int32   `json:"l"`
+	Pw            int32   `json:"pw"`
+	Pl            int32   `json:"pl"`
+	Mov           float32 `json:"mov"`
+	Sos           float32 `json:"sos"`
+	Srs           float32 `json:"srs"`
+	ORtg          float32 `json:"o_rtg"`
+	DRtg          float32 `json:"d_rtg"`
+	NRtg          float32 `json:"n_rtg"`
+	Pace          float32 `json:"pace"`
+	FTr           float32 `json:"f_tr"`
+	PAr3          float32 `json:"p_ar3"`
+	TsPercent     float32 `json:"ts_percent"`
+	EFgPercent    float32 `json:"e_fg_percent"`
+	TovPercent    float32 `json:"tov_percent"`
+	OrbPercent    float32 `json:"orb_percent"`
+	FtFga         float32 `json:"ft_fga"`
+	OppEFgPercent float32 `json:"opp_e_fg_percent"`
+	OppTovPercent float32 `json:"opp_tov_percent"`
+	OppDrbPercent float32 `json:"opp_drb_percent"`
+	OppFtFga      float32 `json:"opp_ft_fga"`
+	Arena         string  `json:"arena"`
+	Attend        int32   `json:"attend"`
+	AttendG       int32   `json:"attend_g"`
 }
 
 type TeamTotal struct {
-	TeamID     int32 `json:"team_id"`
-	TotalID    int32 `json:"total_id"`
-	SeasonYear int32 `json:"season_year"`
+	TeamAbbr   string `json:"team_abbr"`
+	TotalID    int32  `json:"total_id"`
+	SeasonYear int32  `json:"season_year"`
 }
 
 type Total struct {
-	ID   int32       `json:"id"`
-	Gp   int32       `json:"gp"`
-	Gs   pgtype.Int4 `json:"gs"`
-	Mp   int32       `json:"mp"`
-	Fg   int32       `json:"fg"`
-	Fga  int32       `json:"fga"`
-	_3p  int32       `json:"3p"`
-	_3pa int32       `json:"3pa"`
-	_2p  int32       `json:"2p"`
-	_2pa int32       `json:"2pa"`
-	Ft   int32       `json:"ft"`
-	Fta  int32       `json:"fta"`
-	Orb  int32       `json:"orb"`
-	Drb  int32       `json:"drb"`
-	Trb  int32       `json:"trb"`
-	Stl  int32       `json:"stl"`
-	Blk  int32       `json:"blk"`
-	Ast  int32       `json:"ast"`
-	Tov  int32       `json:"tov"`
-	Pf   int32       `json:"pf"`
-	Pts  int32       `json:"pts"`
+	ID  int32       `json:"id"`
+	Gp  int32       `json:"gp"`
+	Gs  pgtype.Int4 `json:"gs"`
+	Mp  int32       `json:"mp"`
+	Fg  int32       `json:"fg"`
+	Fga int32       `json:"fga"`
+	P3  int32       `json:"p3"`
+	Pa3 int32       `json:"pa3"`
+	P2  int32       `json:"p2"`
+	Pa2 int32       `json:"pa2"`
+	Ft  int32       `json:"ft"`
+	Fta int32       `json:"fta"`
+	Orb int32       `json:"orb"`
+	Drb int32       `json:"drb"`
+	Trb int32       `json:"trb"`
+	Stl int32       `json:"stl"`
+	Blk int32       `json:"blk"`
+	Ast int32       `json:"ast"`
+	Tov int32       `json:"tov"`
+	Pf  int32       `json:"pf"`
+	Pts int32       `json:"pts"`
 }

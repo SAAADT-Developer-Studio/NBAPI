@@ -7,7 +7,1174 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createAdvanced = `-- name: CreateAdvanced :exec
+insert into
+    advanced (
+        id,
+        "per",
+        ts_percent,
+        p_ar3,
+        f_tr,
+        orb_percent,
+        drb_percent,
+        trb_percent,
+        ast_percent,
+        stl_percent,
+        blk_percent,
+        tov_percent,
+        usg_percent,
+        ows,
+        dws,
+        ws,
+        ws48,
+        obpm,
+        dbpm,
+        bpm,
+        vorp
+    )
+values (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12,
+        $13,
+        $14,
+        $15,
+        $16,
+        $17,
+        $18,
+        $19,
+        $20,
+        $21
+    )
+`
+
+type CreateAdvancedParams struct {
+	ID         int32   `json:"id"`
+	Per        float32 `json:"per"`
+	TsPercent  float32 `json:"ts_percent"`
+	PAr3       float32 `json:"p_ar3"`
+	FTr        float32 `json:"f_tr"`
+	OrbPercent float32 `json:"orb_percent"`
+	DrbPercent float32 `json:"drb_percent"`
+	TrbPercent float32 `json:"trb_percent"`
+	AstPercent float32 `json:"ast_percent"`
+	StlPercent float32 `json:"stl_percent"`
+	BlkPercent float32 `json:"blk_percent"`
+	TovPercent float32 `json:"tov_percent"`
+	UsgPercent float32 `json:"usg_percent"`
+	Ows        float32 `json:"ows"`
+	Dws        float32 `json:"dws"`
+	Ws         float32 `json:"ws"`
+	Ws48       float32 `json:"ws48"`
+	Obpm       float32 `json:"obpm"`
+	Dbpm       float32 `json:"dbpm"`
+	Bpm        float32 `json:"bpm"`
+	Vorp       float32 `json:"vorp"`
+}
+
+func (q *Queries) CreateAdvanced(ctx context.Context, arg CreateAdvancedParams) error {
+	_, err := q.db.Exec(ctx, createAdvanced,
+		arg.ID,
+		arg.Per,
+		arg.TsPercent,
+		arg.PAr3,
+		arg.FTr,
+		arg.OrbPercent,
+		arg.DrbPercent,
+		arg.TrbPercent,
+		arg.AstPercent,
+		arg.StlPercent,
+		arg.BlkPercent,
+		arg.TovPercent,
+		arg.UsgPercent,
+		arg.Ows,
+		arg.Dws,
+		arg.Ws,
+		arg.Ws48,
+		arg.Obpm,
+		arg.Dbpm,
+		arg.Bpm,
+		arg.Vorp,
+	)
+	return err
+}
+
+const createAllStars = `-- name: CreateAllStars :exec
+insert into
+    all_stars (
+        playerFullName,
+        season_year,
+        teamName,
+        replaced
+    )
+values ($1, $2, $3, $4)
+`
+
+type CreateAllStarsParams struct {
+	Playerfullname string      `json:"playerfullname"`
+	SeasonYear     int32       `json:"season_year"`
+	Teamname       pgtype.Text `json:"teamname"`
+	Replaced       pgtype.Bool `json:"replaced"`
+}
+
+func (q *Queries) CreateAllStars(ctx context.Context, arg CreateAllStarsParams) error {
+	_, err := q.db.Exec(ctx, createAllStars,
+		arg.Playerfullname,
+		arg.SeasonYear,
+		arg.Teamname,
+		arg.Replaced,
+	)
+	return err
+}
+
+const createAllTeams = `-- name: CreateAllTeams :exec
+insert into
+    all_teams (
+        player_id,
+        season_year,
+        "type",
+        team_number
+    )
+values ($1, $2, $3, $4)
+`
+
+type CreateAllTeamsParams struct {
+	PlayerID   int32  `json:"player_id"`
+	SeasonYear int32  `json:"season_year"`
+	Type       string `json:"type"`
+	TeamNumber string `json:"team_number"`
+}
+
+func (q *Queries) CreateAllTeams(ctx context.Context, arg CreateAllTeamsParams) error {
+	_, err := q.db.Exec(ctx, createAllTeams,
+		arg.PlayerID,
+		arg.SeasonYear,
+		arg.Type,
+		arg.TeamNumber,
+	)
+	return err
+}
+
+const createAllTeamsVoting = `-- name: CreateAllTeamsVoting :exec
+insert into
+    all_teams_voting (
+        player_id,
+        season_year,
+        "type",
+        pts_won,
+        pts_max,
+        "share",
+        first_team,
+        second_team,
+        third_team
+    )
+values (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9
+    )
+`
+
+type CreateAllTeamsVotingParams struct {
+	PlayerID   int32   `json:"player_id"`
+	SeasonYear int32   `json:"season_year"`
+	Type       string  `json:"type"`
+	PtsWon     int32   `json:"pts_won"`
+	PtsMax     int32   `json:"pts_max"`
+	Share      float32 `json:"share"`
+	FirstTeam  int32   `json:"first_team"`
+	SecondTeam int32   `json:"second_team"`
+	ThirdTeam  int32   `json:"third_team"`
+}
+
+func (q *Queries) CreateAllTeamsVoting(ctx context.Context, arg CreateAllTeamsVotingParams) error {
+	_, err := q.db.Exec(ctx, createAllTeamsVoting,
+		arg.PlayerID,
+		arg.SeasonYear,
+		arg.Type,
+		arg.PtsWon,
+		arg.PtsMax,
+		arg.Share,
+		arg.FirstTeam,
+		arg.SecondTeam,
+		arg.ThirdTeam,
+	)
+	return err
+}
+
+const createOpponentsPer100Possessions = `-- name: CreateOpponentsPer100Possessions :exec
+insert into
+    opponents_per_100_possesions (
+        team_abbr,
+        per_100_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreateOpponentsPer100PossessionsParams struct {
+	TeamAbbr   string `json:"team_abbr"`
+	Per100ID   int32  `json:"per_100_id"`
+	SeasonYear int32  `json:"season_year"`
+}
+
+func (q *Queries) CreateOpponentsPer100Possessions(ctx context.Context, arg CreateOpponentsPer100PossessionsParams) error {
+	_, err := q.db.Exec(ctx, createOpponentsPer100Possessions, arg.TeamAbbr, arg.Per100ID, arg.SeasonYear)
+	return err
+}
+
+const createOpponentsPerGame = `-- name: CreateOpponentsPerGame :exec
+insert into
+    opponents_per_game (
+        team_abbr,
+        per_game_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreateOpponentsPerGameParams struct {
+	TeamAbbr   string `json:"team_abbr"`
+	PerGameID  int32  `json:"per_game_id"`
+	SeasonYear int32  `json:"season_year"`
+}
+
+func (q *Queries) CreateOpponentsPerGame(ctx context.Context, arg CreateOpponentsPerGameParams) error {
+	_, err := q.db.Exec(ctx, createOpponentsPerGame, arg.TeamAbbr, arg.PerGameID, arg.SeasonYear)
+	return err
+}
+
+const createOpponentsTotals = `-- name: CreateOpponentsTotals :exec
+insert into
+    opponents_totals (
+        team_abbr,
+        total_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreateOpponentsTotalsParams struct {
+	TeamAbbr   string `json:"team_abbr"`
+	TotalID    int32  `json:"total_id"`
+	SeasonYear int32  `json:"season_year"`
+}
+
+func (q *Queries) CreateOpponentsTotals(ctx context.Context, arg CreateOpponentsTotalsParams) error {
+	_, err := q.db.Exec(ctx, createOpponentsTotals, arg.TeamAbbr, arg.TotalID, arg.SeasonYear)
+	return err
+}
+
+const createPer100Possesions = `-- name: CreatePer100Possesions :exec
+INSERT INTO
+    per_100_possesions (
+        id,
+        fg,
+        fga,
+        p3,
+        pa3,
+        p2,
+        pa2,
+        ft,
+        fta,
+        orb,
+        drb,
+        trb,
+        stl,
+        blk,
+        ast,
+        tov,
+        pf,
+        pts,
+        o_rtg,
+        d_rtg
+    )
+VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12,
+        $13,
+        $14,
+        $15,
+        $16,
+        $17,
+        $18,
+        $19,
+        $20
+    )
+`
+
+type CreatePer100PossesionsParams struct {
+	ID   int32         `json:"id"`
+	Fg   float32       `json:"fg"`
+	Fga  float32       `json:"fga"`
+	P3   int32         `json:"p3"`
+	Pa3  int32         `json:"pa3"`
+	P2   int32         `json:"p2"`
+	Pa2  int32         `json:"pa2"`
+	Ft   float32       `json:"ft"`
+	Fta  float32       `json:"fta"`
+	Orb  float32       `json:"orb"`
+	Drb  float32       `json:"drb"`
+	Trb  float32       `json:"trb"`
+	Stl  float32       `json:"stl"`
+	Blk  float32       `json:"blk"`
+	Ast  float32       `json:"ast"`
+	Tov  float32       `json:"tov"`
+	Pf   float32       `json:"pf"`
+	Pts  float32       `json:"pts"`
+	ORtg pgtype.Float4 `json:"o_rtg"`
+	DRtg pgtype.Float4 `json:"d_rtg"`
+}
+
+func (q *Queries) CreatePer100Possesions(ctx context.Context, arg CreatePer100PossesionsParams) error {
+	_, err := q.db.Exec(ctx, createPer100Possesions,
+		arg.ID,
+		arg.Fg,
+		arg.Fga,
+		arg.P3,
+		arg.Pa3,
+		arg.P2,
+		arg.Pa2,
+		arg.Ft,
+		arg.Fta,
+		arg.Orb,
+		arg.Drb,
+		arg.Trb,
+		arg.Stl,
+		arg.Blk,
+		arg.Ast,
+		arg.Tov,
+		arg.Pf,
+		arg.Pts,
+		arg.ORtg,
+		arg.DRtg,
+	)
+	return err
+}
+
+const createPer36 = `-- name: CreatePer36 :exec
+INSERT INTO
+    per_36 (
+        player_id,
+        season_year,
+        fg,
+        fga,
+        p3,
+        pa3,
+        p2,
+        pa2,
+        ft,
+        fta,
+        orb,
+        drb,
+        trb,
+        stl,
+        blk,
+        ast,
+        tov,
+        pf,
+        pts
+    )
+VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12,
+        $13,
+        $14,
+        $15,
+        $16,
+        $17,
+        $18,
+        $19
+    )
+`
+
+type CreatePer36Params struct {
+	PlayerID   int32   `json:"player_id"`
+	SeasonYear int32   `json:"season_year"`
+	Fg         float32 `json:"fg"`
+	Fga        float32 `json:"fga"`
+	P3         int32   `json:"p3"`
+	Pa3        int32   `json:"pa3"`
+	P2         int32   `json:"p2"`
+	Pa2        int32   `json:"pa2"`
+	Ft         float32 `json:"ft"`
+	Fta        float32 `json:"fta"`
+	Orb        float32 `json:"orb"`
+	Drb        float32 `json:"drb"`
+	Trb        float32 `json:"trb"`
+	Stl        float32 `json:"stl"`
+	Blk        float32 `json:"blk"`
+	Ast        float32 `json:"ast"`
+	Tov        float32 `json:"tov"`
+	Pf         float32 `json:"pf"`
+	Pts        float32 `json:"pts"`
+}
+
+func (q *Queries) CreatePer36(ctx context.Context, arg CreatePer36Params) error {
+	_, err := q.db.Exec(ctx, createPer36,
+		arg.PlayerID,
+		arg.SeasonYear,
+		arg.Fg,
+		arg.Fga,
+		arg.P3,
+		arg.Pa3,
+		arg.P2,
+		arg.Pa2,
+		arg.Ft,
+		arg.Fta,
+		arg.Orb,
+		arg.Drb,
+		arg.Trb,
+		arg.Stl,
+		arg.Blk,
+		arg.Ast,
+		arg.Tov,
+		arg.Pf,
+		arg.Pts,
+	)
+	return err
+}
+
+const createPerGame = `-- name: CreatePerGame :exec
+insert into
+    per_game (
+        id,
+        mp,
+        fg,
+        fga,
+        fg_percent,
+        p3,
+        pa3,
+        p_percent3,
+        p2,
+        pa2,
+        p_percent2,
+        efg_percent,
+        ft,
+        fta,
+        ft_percent,
+        orb,
+        drb,
+        trb,
+        ast,
+        stl,
+        blk,
+        tov,
+        pf,
+        pts
+    )
+values (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12,
+        $13,
+        $14,
+        $15,
+        $16,
+        $17,
+        $18,
+        $19,
+        $20,
+        $21,
+        $22,
+        $23,
+        $24
+    )
+`
+
+type CreatePerGameParams struct {
+	ID         int32   `json:"id"`
+	Mp         float32 `json:"mp"`
+	Fg         float32 `json:"fg"`
+	Fga        float32 `json:"fga"`
+	FgPercent  float32 `json:"fg_percent"`
+	P3         int32   `json:"p3"`
+	Pa3        int32   `json:"pa3"`
+	PPercent3  float32 `json:"p_percent3"`
+	P2         int32   `json:"p2"`
+	Pa2        int32   `json:"pa2"`
+	PPercent2  float32 `json:"p_percent2"`
+	EfgPercent float32 `json:"efg_percent"`
+	Ft         float32 `json:"ft"`
+	Fta        float32 `json:"fta"`
+	FtPercent  float32 `json:"ft_percent"`
+	Orb        float32 `json:"orb"`
+	Drb        float32 `json:"drb"`
+	Trb        float32 `json:"trb"`
+	Ast        float32 `json:"ast"`
+	Stl        float32 `json:"stl"`
+	Blk        float32 `json:"blk"`
+	Tov        float32 `json:"tov"`
+	Pf         float32 `json:"pf"`
+	Pts        float32 `json:"pts"`
+}
+
+func (q *Queries) CreatePerGame(ctx context.Context, arg CreatePerGameParams) error {
+	_, err := q.db.Exec(ctx, createPerGame,
+		arg.ID,
+		arg.Mp,
+		arg.Fg,
+		arg.Fga,
+		arg.FgPercent,
+		arg.P3,
+		arg.Pa3,
+		arg.PPercent3,
+		arg.P2,
+		arg.Pa2,
+		arg.PPercent2,
+		arg.EfgPercent,
+		arg.Ft,
+		arg.Fta,
+		arg.FtPercent,
+		arg.Orb,
+		arg.Drb,
+		arg.Trb,
+		arg.Ast,
+		arg.Stl,
+		arg.Blk,
+		arg.Tov,
+		arg.Pf,
+		arg.Pts,
+	)
+	return err
+}
+
+const createPlayer = `-- name: CreatePlayer :exec
+insert into player (id, fullName) values ($1, $2)
+`
+
+type CreatePlayerParams struct {
+	ID       int32  `json:"id"`
+	Fullname string `json:"fullname"`
+}
+
+func (q *Queries) CreatePlayer(ctx context.Context, arg CreatePlayerParams) error {
+	_, err := q.db.Exec(ctx, createPlayer, arg.ID, arg.Fullname)
+	return err
+}
+
+const createPlayerAdvanced = `-- name: CreatePlayerAdvanced :exec
+insert into
+    player_advanced (
+        player_id,
+        advanced_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreatePlayerAdvancedParams struct {
+	PlayerID   int32 `json:"player_id"`
+	AdvancedID int32 `json:"advanced_id"`
+	SeasonYear int32 `json:"season_year"`
+}
+
+func (q *Queries) CreatePlayerAdvanced(ctx context.Context, arg CreatePlayerAdvancedParams) error {
+	_, err := q.db.Exec(ctx, createPlayerAdvanced, arg.PlayerID, arg.AdvancedID, arg.SeasonYear)
+	return err
+}
+
+const createPlayerAwards = `-- name: CreatePlayerAwards :exec
+insert into
+    player_awards (
+        player_id,
+        season_year,
+        award,
+        pts_won,
+        pts_max,
+        "share",
+        winner
+    )
+values ($1, $2, $3, $4, $5, $6, $7)
+`
+
+type CreatePlayerAwardsParams struct {
+	PlayerID   int32   `json:"player_id"`
+	SeasonYear int32   `json:"season_year"`
+	Award      string  `json:"award"`
+	PtsWon     int32   `json:"pts_won"`
+	PtsMax     int32   `json:"pts_max"`
+	Share      float32 `json:"share"`
+	Winner     bool    `json:"winner"`
+}
+
+func (q *Queries) CreatePlayerAwards(ctx context.Context, arg CreatePlayerAwardsParams) error {
+	_, err := q.db.Exec(ctx, createPlayerAwards,
+		arg.PlayerID,
+		arg.SeasonYear,
+		arg.Award,
+		arg.PtsWon,
+		arg.PtsMax,
+		arg.Share,
+		arg.Winner,
+	)
+	return err
+}
+
+const createPlayerPer100Possesions = `-- name: CreatePlayerPer100Possesions :exec
+insert into
+    player_per_100_possesions (
+        player_id,
+        per_100_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreatePlayerPer100PossesionsParams struct {
+	PlayerID   int32 `json:"player_id"`
+	Per100ID   int32 `json:"per_100_id"`
+	SeasonYear int32 `json:"season_year"`
+}
+
+func (q *Queries) CreatePlayerPer100Possesions(ctx context.Context, arg CreatePlayerPer100PossesionsParams) error {
+	_, err := q.db.Exec(ctx, createPlayerPer100Possesions, arg.PlayerID, arg.Per100ID, arg.SeasonYear)
+	return err
+}
+
+const createPlayerPerGame = `-- name: CreatePlayerPerGame :exec
+insert into
+    player_per_game (
+        player_id,
+        per_game_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreatePlayerPerGameParams struct {
+	PlayerID   int32 `json:"player_id"`
+	PerGameID  int32 `json:"per_game_id"`
+	SeasonYear int32 `json:"season_year"`
+}
+
+func (q *Queries) CreatePlayerPerGame(ctx context.Context, arg CreatePlayerPerGameParams) error {
+	_, err := q.db.Exec(ctx, createPlayerPerGame, arg.PlayerID, arg.PerGameID, arg.SeasonYear)
+	return err
+}
+
+const createPlayerShooting = `-- name: CreatePlayerShooting :exec
+insert into
+    player_shooting (
+        season_year,
+        player_id,
+        avg_dist_fga,
+        percent_fga_from_2p_range,
+        percent_fga_from_0_3_range,
+        percent_fga_from_3_10_range,
+        percent_fga_from_10_16_range,
+        percent_fga_from_16_3p_range,
+        percent_fga_from_3p_range,
+        fg_percent_from_2p_range,
+        fg_percent_from_0_3_range,
+        fg_percent_from_3_10_range,
+        fg_percent_from_10_16_range,
+        fg_percent_from_16_3p_range,
+        fg_percent_from_3p_range,
+        percent_assisted_2p_fg,
+        percent_assisted_3p_fg,
+        percent_dunks_of_fga,
+        num_of_dunks,
+        percent_corner_3s_of_3pa,
+        corner_3_point_percent,
+        num_heaves_attempted,
+        num_heaves_made
+    )
+values (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12,
+        $13,
+        $14,
+        $15,
+        $16,
+        $17,
+        $18,
+        $19,
+        $20,
+        $21,
+        $22,
+        $23
+    )
+`
+
+type CreatePlayerShootingParams struct {
+	SeasonYear              int32   `json:"season_year"`
+	PlayerID                int32   `json:"player_id"`
+	AvgDistFga              float32 `json:"avg_dist_fga"`
+	PercentFgaFrom2pRange   float32 `json:"percent_fga_from_2p_range"`
+	PercentFgaFrom03Range   float32 `json:"percent_fga_from_0_3_range"`
+	PercentFgaFrom310Range  float32 `json:"percent_fga_from_3_10_range"`
+	PercentFgaFrom1016Range float32 `json:"percent_fga_from_10_16_range"`
+	PercentFgaFrom163pRange float32 `json:"percent_fga_from_16_3p_range"`
+	PercentFgaFrom3pRange   float32 `json:"percent_fga_from_3p_range"`
+	FgPercentFrom2pRange    float32 `json:"fg_percent_from_2p_range"`
+	FgPercentFrom03Range    float32 `json:"fg_percent_from_0_3_range"`
+	FgPercentFrom310Range   float32 `json:"fg_percent_from_3_10_range"`
+	FgPercentFrom1016Range  float32 `json:"fg_percent_from_10_16_range"`
+	FgPercentFrom163pRange  float32 `json:"fg_percent_from_16_3p_range"`
+	FgPercentFrom3pRange    float32 `json:"fg_percent_from_3p_range"`
+	PercentAssisted2pFg     float32 `json:"percent_assisted_2p_fg"`
+	PercentAssisted3pFg     float32 `json:"percent_assisted_3p_fg"`
+	PercentDunksOfFga       float32 `json:"percent_dunks_of_fga"`
+	NumOfDunks              float32 `json:"num_of_dunks"`
+	PercentCorner3sOf3pa    float32 `json:"percent_corner_3s_of_3pa"`
+	Corner3PointPercent     float32 `json:"corner_3_point_percent"`
+	NumHeavesAttempted      int32   `json:"num_heaves_attempted"`
+	NumHeavesMade           int32   `json:"num_heaves_made"`
+}
+
+func (q *Queries) CreatePlayerShooting(ctx context.Context, arg CreatePlayerShootingParams) error {
+	_, err := q.db.Exec(ctx, createPlayerShooting,
+		arg.SeasonYear,
+		arg.PlayerID,
+		arg.AvgDistFga,
+		arg.PercentFgaFrom2pRange,
+		arg.PercentFgaFrom03Range,
+		arg.PercentFgaFrom310Range,
+		arg.PercentFgaFrom1016Range,
+		arg.PercentFgaFrom163pRange,
+		arg.PercentFgaFrom3pRange,
+		arg.FgPercentFrom2pRange,
+		arg.FgPercentFrom03Range,
+		arg.FgPercentFrom310Range,
+		arg.FgPercentFrom1016Range,
+		arg.FgPercentFrom163pRange,
+		arg.FgPercentFrom3pRange,
+		arg.PercentAssisted2pFg,
+		arg.PercentAssisted3pFg,
+		arg.PercentDunksOfFga,
+		arg.NumOfDunks,
+		arg.PercentCorner3sOf3pa,
+		arg.Corner3PointPercent,
+		arg.NumHeavesAttempted,
+		arg.NumHeavesMade,
+	)
+	return err
+}
+
+const createPlayerTeam = `-- name: CreatePlayerTeam :exec
+insert into player_team (
+  team_abbr,
+  player_id,
+  season_year,
+  age,
+  experience,
+  position
+
+
+) values ( $1, $2, $3, $4, $5, $6)
+`
+
+type CreatePlayerTeamParams struct {
+	TeamAbbr   string `json:"team_abbr"`
+	PlayerID   int32  `json:"player_id"`
+	SeasonYear int32  `json:"season_year"`
+	Age        int32  `json:"age"`
+	Experience int32  `json:"experience"`
+	Position   string `json:"position"`
+}
+
+func (q *Queries) CreatePlayerTeam(ctx context.Context, arg CreatePlayerTeamParams) error {
+	_, err := q.db.Exec(ctx, createPlayerTeam,
+		arg.TeamAbbr,
+		arg.PlayerID,
+		arg.SeasonYear,
+		arg.Age,
+		arg.Experience,
+		arg.Position,
+	)
+	return err
+}
+
+const createPlayerTotals = `-- name: CreatePlayerTotals :exec
+insert into
+    player_totals (
+        player_id,
+        total_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreatePlayerTotalsParams struct {
+	PlayerID   int32 `json:"player_id"`
+	TotalID    int32 `json:"total_id"`
+	SeasonYear int32 `json:"season_year"`
+}
+
+func (q *Queries) CreatePlayerTotals(ctx context.Context, arg CreatePlayerTotalsParams) error {
+	_, err := q.db.Exec(ctx, createPlayerTotals, arg.PlayerID, arg.TotalID, arg.SeasonYear)
+	return err
+}
+
+const createTeam = `-- name: CreateTeam :exec
+insert into team (abbr, fullName) values ($1, $2)
+`
+
+type CreateTeamParams struct {
+	Abbr     string `json:"abbr"`
+	Fullname string `json:"fullname"`
+}
+
+func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) error {
+	_, err := q.db.Exec(ctx, createTeam, arg.Abbr, arg.Fullname)
+	return err
+}
+
+const createTeamPer100Possesions = `-- name: CreateTeamPer100Possesions :exec
+insert into
+    team_per_100_possesions (
+        team_abbr,
+        per_100_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreateTeamPer100PossesionsParams struct {
+	TeamAbbr   string `json:"team_abbr"`
+	Per100ID   int32  `json:"per_100_id"`
+	SeasonYear int32  `json:"season_year"`
+}
+
+func (q *Queries) CreateTeamPer100Possesions(ctx context.Context, arg CreateTeamPer100PossesionsParams) error {
+	_, err := q.db.Exec(ctx, createTeamPer100Possesions, arg.TeamAbbr, arg.Per100ID, arg.SeasonYear)
+	return err
+}
+
+const createTeamPerGame = `-- name: CreateTeamPerGame :exec
+insert into
+    team_per_game (
+        team_abbr,
+        per_game_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreateTeamPerGameParams struct {
+	TeamAbbr   string `json:"team_abbr"`
+	PerGameID  int32  `json:"per_game_id"`
+	SeasonYear int32  `json:"season_year"`
+}
+
+func (q *Queries) CreateTeamPerGame(ctx context.Context, arg CreateTeamPerGameParams) error {
+	_, err := q.db.Exec(ctx, createTeamPerGame, arg.TeamAbbr, arg.PerGameID, arg.SeasonYear)
+	return err
+}
+
+const createTeamSeason = `-- name: CreateTeamSeason :exec
+insert into
+    team_season (
+        season_year,
+        team_abbr,
+        playoffs,
+        avarage_age,
+        w,
+        l,
+        pw,
+        pl,
+        mov,
+        sos,
+        srs,
+        o_rtg,
+        d_rtg,
+        n_rtg,
+        pace,
+        f_tr,
+        p_ar3,
+        ts_percent,
+        e_fg_percent,
+        tov_percent,
+        orb_percent,
+        ft_fga,
+        opp_e_fg_percent,
+        opp_tov_percent,
+        opp_drb_percent,
+        opp_ft_fga,
+        arena,
+        attend,
+        attend_g
+    )
+values (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12,
+        $13,
+        $14,
+        $15,
+        $16,
+        $17,
+        $18,
+        $19,
+        $20,
+        $21,
+        $22,
+        $23,
+        $24,
+        $25,
+        $26,
+        $27,
+        $28,
+        $29
+    )
+`
+
+type CreateTeamSeasonParams struct {
+	SeasonYear    int32   `json:"season_year"`
+	TeamAbbr      string  `json:"team_abbr"`
+	Playoffs      bool    `json:"playoffs"`
+	AvarageAge    float32 `json:"avarage_age"`
+	W             int32   `json:"w"`
+	L             int32   `json:"l"`
+	Pw            int32   `json:"pw"`
+	Pl            int32   `json:"pl"`
+	Mov           float32 `json:"mov"`
+	Sos           float32 `json:"sos"`
+	Srs           float32 `json:"srs"`
+	ORtg          float32 `json:"o_rtg"`
+	DRtg          float32 `json:"d_rtg"`
+	NRtg          float32 `json:"n_rtg"`
+	Pace          float32 `json:"pace"`
+	FTr           float32 `json:"f_tr"`
+	PAr3          float32 `json:"p_ar3"`
+	TsPercent     float32 `json:"ts_percent"`
+	EFgPercent    float32 `json:"e_fg_percent"`
+	TovPercent    float32 `json:"tov_percent"`
+	OrbPercent    float32 `json:"orb_percent"`
+	FtFga         float32 `json:"ft_fga"`
+	OppEFgPercent float32 `json:"opp_e_fg_percent"`
+	OppTovPercent float32 `json:"opp_tov_percent"`
+	OppDrbPercent float32 `json:"opp_drb_percent"`
+	OppFtFga      float32 `json:"opp_ft_fga"`
+	Arena         string  `json:"arena"`
+	Attend        int32   `json:"attend"`
+	AttendG       int32   `json:"attend_g"`
+}
+
+func (q *Queries) CreateTeamSeason(ctx context.Context, arg CreateTeamSeasonParams) error {
+	_, err := q.db.Exec(ctx, createTeamSeason,
+		arg.SeasonYear,
+		arg.TeamAbbr,
+		arg.Playoffs,
+		arg.AvarageAge,
+		arg.W,
+		arg.L,
+		arg.Pw,
+		arg.Pl,
+		arg.Mov,
+		arg.Sos,
+		arg.Srs,
+		arg.ORtg,
+		arg.DRtg,
+		arg.NRtg,
+		arg.Pace,
+		arg.FTr,
+		arg.PAr3,
+		arg.TsPercent,
+		arg.EFgPercent,
+		arg.TovPercent,
+		arg.OrbPercent,
+		arg.FtFga,
+		arg.OppEFgPercent,
+		arg.OppTovPercent,
+		arg.OppDrbPercent,
+		arg.OppFtFga,
+		arg.Arena,
+		arg.Attend,
+		arg.AttendG,
+	)
+	return err
+}
+
+const createTeamTotals = `-- name: CreateTeamTotals :exec
+insert into
+    team_totals (
+        team_abbr,
+        total_id,
+        season_year
+    )
+values ($1, $2, $3)
+`
+
+type CreateTeamTotalsParams struct {
+	TeamAbbr   string `json:"team_abbr"`
+	TotalID    int32  `json:"total_id"`
+	SeasonYear int32  `json:"season_year"`
+}
+
+func (q *Queries) CreateTeamTotals(ctx context.Context, arg CreateTeamTotalsParams) error {
+	_, err := q.db.Exec(ctx, createTeamTotals, arg.TeamAbbr, arg.TotalID, arg.SeasonYear)
+	return err
+}
+
+const createTotals = `-- name: CreateTotals :exec
+insert into
+    totals (
+        id,
+        gp,
+        gs,
+        mp,
+        fg,
+        fga,
+        p3,
+        pa3,
+        p2,
+        pa2,
+        ft,
+        fta,
+        orb,
+        drb,
+        trb,
+        stl,
+        blk,
+        ast,
+        tov,
+        pf,
+        pts
+    )
+values (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12,
+        $13,
+        $14,
+        $15,
+        $16,
+        $17,
+        $18,
+        $19,
+        $20,
+        $21
+    )
+`
+
+type CreateTotalsParams struct {
+	ID  int32       `json:"id"`
+	Gp  int32       `json:"gp"`
+	Gs  pgtype.Int4 `json:"gs"`
+	Mp  int32       `json:"mp"`
+	Fg  int32       `json:"fg"`
+	Fga int32       `json:"fga"`
+	P3  int32       `json:"p3"`
+	Pa3 int32       `json:"pa3"`
+	P2  int32       `json:"p2"`
+	Pa2 int32       `json:"pa2"`
+	Ft  int32       `json:"ft"`
+	Fta int32       `json:"fta"`
+	Orb int32       `json:"orb"`
+	Drb int32       `json:"drb"`
+	Trb int32       `json:"trb"`
+	Stl int32       `json:"stl"`
+	Blk int32       `json:"blk"`
+	Ast int32       `json:"ast"`
+	Tov int32       `json:"tov"`
+	Pf  int32       `json:"pf"`
+	Pts int32       `json:"pts"`
+}
+
+func (q *Queries) CreateTotals(ctx context.Context, arg CreateTotalsParams) error {
+	_, err := q.db.Exec(ctx, createTotals,
+		arg.ID,
+		arg.Gp,
+		arg.Gs,
+		arg.Mp,
+		arg.Fg,
+		arg.Fga,
+		arg.P3,
+		arg.Pa3,
+		arg.P2,
+		arg.Pa2,
+		arg.Ft,
+		arg.Fta,
+		arg.Orb,
+		arg.Drb,
+		arg.Trb,
+		arg.Stl,
+		arg.Blk,
+		arg.Ast,
+		arg.Tov,
+		arg.Pf,
+		arg.Pts,
+	)
+	return err
+}
 
 const getPlayer = `-- name: GetPlayer :one
 select id, fullname from player where id = $1

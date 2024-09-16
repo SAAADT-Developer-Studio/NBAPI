@@ -71,9 +71,12 @@ watch:
 sqlc:
 	@sqlc generate
 
-seed-local:
+seed-fast:
+	@PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -f data/backup.sql
+
+seed-slow:
 	@PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -f data/schema.sql
-	@PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -f data/dumps/seed.sql
+	@go run scripts/parser.go
 
 seed-prod:
 	@echo "TODO"
