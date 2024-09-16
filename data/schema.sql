@@ -8,8 +8,8 @@ CREATE TABLE player (
 );
 
 CREATE TABLE team (
-    fullName VARCHAR(100) NOT NULL,
-    abbr VARCHAR(3) PRIMARY KEY
+    abbr VARCHAR(3) PRIMARY KEY,
+    fullName VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE totals (
@@ -19,10 +19,10 @@ CREATE TABLE totals (
     mp INT NOT NULL,
     fg INT NOT NULL,
     fga INT NOT NULL,
-    "3p" INT NOT NULL,
-    "3pa" INT NOT NULL,
-    "2p" INT NOT NULL,
-    "2pa" INT NOT NULL,
+    p3 INT NOT NULL,
+    pa3 INT NOT NULL,
+    p2 INT NOT NULL,
+    pa2 INT NOT NULL,
     ft INT NOT NULL,
     fta INT NOT NULL,
     orb INT NOT NULL,
@@ -40,10 +40,10 @@ CREATE Table per_100_possesions (
     id INT PRIMARY KEY,
     fg REAL NOT NULL,
     fga REAL NOT NULL,
-    "3p" INT NOT NULL,
-    "3pa" INT NOT NULL,
-    "2p" INT NOT NULL,
-    "2pa" INT NOT NULL,
+    p3 INT NOT NULL,
+    pa3 INT NOT NULL,
+    p2 INT NOT NULL,
+    pa2 INT NOT NULL,
     ft REAL NOT NULL,
     fta REAL NOT NULL,
     orb REAL NOT NULL,
@@ -65,13 +65,13 @@ CREATE Table per_game (
     fg REAL NOT NULL,
     fga REAL NOT NULL,
     fg_percent REAL NOT NULL,
-    "3p" INT NOT NULL,
-    "3pa" INT NOT NULL,
-    "3p_percent" REAL NOT NULL,
-    "2p" INT NOT NULL,
-    "2pa" INT NOT NULL,
-    "2p_percent" REAL NOT NULL,
-    efg_percent REAL NOT NULL
+    p3 INT NOT NULL,
+    pa3 INT NOT NULL,
+    p_percent3 REAL NOT NULL,
+    p2 INT NOT NULL,
+    pa2 INT NOT NULL,
+    p_percent2 REAL NOT NULL,
+    efg_percent REAL NOT NULL,
     ft REAL NOT NULL,
     fta REAL NOT NULL,
     ft_percent REAL NOT NULL,
@@ -83,14 +83,14 @@ CREATE Table per_game (
     blk REAL NOT NULL,
     tov REAL NOT NULL,
     pf REAL NOT NULL,
-    pts REAL NOT NULL,
+    pts REAL NOT NULL
 );
 
 CREATE Table advanced (
     id INT PRIMARY KEY,
     "per" REAL NOT NULL,
     ts_percent REAL NOT NULL,
-    "3p_ar" REAL NOT NULL,
+    p_ar3 REAL NOT NULL,
     f_tr REAL NOT NULL,
     orb_percent REAL NOT NULL,
     drb_percent REAL NOT NULL,
@@ -117,10 +117,10 @@ CREATE TABLE all_teams_voting (
     pts_won INT NOT NULL,
     pts_max INT NOT NULL,
     "share" REAL NOT NULL,
-    "1st_team" INT NOT NULL,
-    "2nd_team" INT NOT NULL,
-    "3rd_team" INT NOT NULL,
-    PRIMARY KEY (player_id, season_year),
+    first_team INT NOT NULL,
+    second_team INT NOT NULL,
+    third_team INT NOT NULL,
+    PRIMARY KEY (player_id, season_year)
 );
 
 CREATE TABLE per_36 (
@@ -128,10 +128,10 @@ CREATE TABLE per_36 (
     season_year INT NOT NULL,
     fg REAL NOT NULL,
     fga REAL NOT NULL,
-    "3p" REAL NOT NULL,
-    "3pa" REAL NOT NULL,
-    "2p" REAL NOT NULL,
-    "2pa" REAL NOT NULL,
+    p3 INT NOT NULL,
+    pa3 INT NOT NULL,
+    p2 INT NOT NULL,
+    pa2 INT NOT NULL,
     ft REAL NOT NULL,
     fta REAL NOT NULL,
     orb REAL NOT NULL,
@@ -248,7 +248,7 @@ CREATE TABLE player_advanced (
 CREATE TABLE player_shooting (
     season_year INT NOT NULL,
     player_id INT NOT NULL REFERENCES player (id),
-    avg_dist_fga REAL NOT NULL REAL NOT NULL,
+    avg_dist_fga REAL NOT NULL,
     percent_fga_from_2p_range REAL NOT NULL,
     percent_fga_from_0_3_range REAL NOT NULL,
     percent_fga_from_3_10_range REAL NOT NULL,
@@ -269,7 +269,7 @@ CREATE TABLE player_shooting (
     corner_3_point_percent REAL NOT NULL,
     num_heaves_attempted INT NOT NULL,
     num_heaves_made INT NOT NULL,
-    PRIMARY KEY(season_year, player_id)
+    PRIMARY KEY (season_year, player_id)
 );
 
 CREATE TABLE player_awards (
@@ -280,7 +280,7 @@ CREATE TABLE player_awards (
     pts_max INT NOT NULL,
     share REAL NOT NULL,
     winner BOOLEAN NOT NULL,
-    PRIMARY KEY(season_year, player_id)
+    PRIMARY KEY (season_year, player_id)
 );
 
 CREATE TABLE team_season (
@@ -300,7 +300,7 @@ CREATE TABLE team_season (
     n_rtg REAL NOT NULL,
     pace REAL NOT NULL,
     f_tr REAL NOT NULL,
-    3p_ar REAL NOT NULL,     
+    p_ar3 REAL NOT NULL,
     ts_percent REAL NOT NULL,
     e_fg_percent REAL NOT NULL,
     tov_percent REAL NOT NULL,
@@ -312,5 +312,5 @@ CREATE TABLE team_season (
     opp_ft_fga REAL NOT NULL,
     arena VARCHAR(100) NOT NULL,
     attend INT NOT NULL,
-    attend_g INT NOT NULL,
+    attend_g INT NOT NULL
 );
