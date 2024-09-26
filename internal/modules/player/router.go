@@ -8,5 +8,10 @@ func Router(router chi.Router) {
 	router.Get("/", PlayersHandler)
 	router.Route("/{playerId}", func(router chi.Router) {
 		router.Get("/", PlayerHandler)
+		router.Get("/stat", PlayerSpecificStatsHandler)
 	})
+	router.Route("/stats", func(routter chi.Router){
+		router.Get("/", PlayerStatsHandler)
+	})
+
 }
