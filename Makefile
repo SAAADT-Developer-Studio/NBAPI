@@ -72,6 +72,7 @@ sqlc:
 	@sqlc generate
 
 seed-fast:
+	@PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -c "DROP SCHEMA postgres CASCADE";
 	@PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -f data/backup.sql
 
 seed-slow:
@@ -80,5 +81,8 @@ seed-slow:
 
 seed-prod:
 	@echo "TODO"
+
+postgres-dump:
+	@pg_dump -U postgres -h localhost -d postgres -f .data/backup.sql
 
 .PHONY: all build run test clean watch
