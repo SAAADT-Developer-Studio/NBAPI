@@ -4,7 +4,7 @@ select
 from
   team
 where
-  fullname like '%' || $1 || '%';
+  lower(fullname) like '%' || lower($1) || '%';
 
 -- name: GetTeam :one
 select
