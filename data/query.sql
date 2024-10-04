@@ -5,7 +5,7 @@ select * from player;
 select * from player where id = $1;
 
 -- name: GetPlayerBySearch :many
-select * from player where name like '%' || $1 || '%';
+select * from player where fullname like '%' || $1 || '%';
 
 -- name: GetPlayerStats :many
 select player.id, player.fullName, player_totals.season_year, totals.gp, totals.gs, totals.mp as total_mp, totals.fg as totals_fg, totals.fga as totals_fga, totals.p3 as totals_p3, totals.pa3 as totals_pa3,
@@ -28,7 +28,7 @@ player_shooting.corner_3_point_percent, player_shooting.num_heaves_attempted, pl
 advanced.p_ar3, advanced.f_tr, advanced.orb_percent, advanced.drb_percent, advanced.trb_percent, advanced.ast_percent, advanced.stl_percent,
 advanced.blk_percent, advanced.tov_percent, advanced.usg_percent, advanced.ows, advanced.dws, advanced.ws, advanced.ws48, advanced.obpm,
 advanced.dbpm, advanced.bpm, advanced.vorp
-from player left join player_totals on player.id = totals.player_id left join totals on totals.id = player_totals.total_id 
+from player left join player_totals on player.id = totals.player_id left join totals on totals.id = player_totals.total_id
 left join player_per_game on player.id = player_per_game.player_id left join per_game on per_game.id = player_per_game.per_game_id
 left join player_per_100_possesions on player.id = player_per_100_possesions.player_id left join per_100_possesions on per_100_possesions.id = player_per_100_possesions.per_100_id
 left join per_36 on per_36.player_id = player.id left join player_shooting on player_shooting.player_id = player.id

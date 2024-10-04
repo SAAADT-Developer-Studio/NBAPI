@@ -1,8 +1,11 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "data/query.sql"
-    schema: "data/schema.sql"
+    queries:
+      - "data/query.sql"
+      - "data/teams.sql"
+    schema:
+      - "data/schema.sql"
     gen:
       go:
         package: "sqlc"

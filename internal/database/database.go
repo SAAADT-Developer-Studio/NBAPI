@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
@@ -38,12 +39,39 @@ var (
 	Queries  *sqlc.Queries
 )
 
+type PgTracer struct {
+	logger *logrus.Logger
+}
+
+func (pt *PgTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
+	pt.logger.Printf("Executing query: %s, args: %v", data.SQL, data.Args)
+	return ctx
+}
+
+func (pt *PgTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
+	if data.Err != nil {
+		pt.logger.Printf("Query failed: %v", data.Err)
+	} else {
+		pt.logger.Printf("Query executed successfully.")
+	}
+}
+
 func Init() {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, password, host, port, database)
 	logrus.Info("Connecting to database ", connStr)
 
+	pgxLogger := logrus.New()
+	tracer := &PgTracer{logger: pgxLogger}
+
+	config, err := pgxpool.ParseConfig(connStr)
+	if err != nil {
+		logrus.Fatalf("Unable to parse config: %v\n", err)
+	}
+
+	config.ConnConfig.Tracer = tracer
 	ctx := context.Background()
-	conn, err := pgxpool.New(ctx, connStr)
+	conn, err := pgxpool.NewWithConfig(ctx, config)
+
 	if err != nil {
 		log.Fatal(err)
 	}

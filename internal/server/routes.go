@@ -3,6 +3,7 @@ package server
 import (
 	"NBAPI/internal/database"
 	"NBAPI/internal/modules/player"
+	"NBAPI/internal/modules/team"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -28,7 +29,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.Get("/", s.HelloWorldHandler)
 	r.Route("/players", player.Router)
-	r.Route("/teams", player.Router)
+	r.Route("/teams", team.Router)
 
 	r.Get("/health", s.healthHandler)
 

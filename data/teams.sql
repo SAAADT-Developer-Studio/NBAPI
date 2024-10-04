@@ -1,0 +1,34 @@
+-- name: GetTeams :many
+select
+  *
+from
+  team
+where
+  fullname like '%' || $1 || '%';
+
+-- name: GetTeam :one
+select
+  *
+from
+  team
+where
+  abbr = $1;
+
+-- name: GetTeamTotals :many
+select totals.* from team
+  inner join team_totals on team.abbr = team_totals.team_abbr
+  inner join totals on team_totals.total_id = totals.id
+  where team.abbr = $1;
+
+
+-- name: GetTeamPer100Possesions :many
+select per_100_possesions.* from team
+  inner join team_per_100_possesions on team.abbr = team_per_100_possesions.team_abbr
+  inner join per_100_possesions on team_per_100_possesions.per_100_id = per_100_possesions.id
+  where team.abbr = $1;
+
+-- name: GetTeamPerGame :many
+select per_game.* from team
+  inner join team_per_game on team.abbr = team_per_game.team_abbr
+  inner join per_game on team_per_game.per_game_id = per_game.id
+  where team.abbr = $1;
