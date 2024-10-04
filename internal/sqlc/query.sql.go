@@ -383,7 +383,7 @@ func (q *Queries) CreatePer100Possesions(ctx context.Context, arg CreatePer100Po
 
 const createPer36 = `-- name: CreatePer36 :exec
 INSERT INTO
-    per_36 (
+    player_per_36 (
         player_id,
         season_year,
         fg,
@@ -1176,23 +1176,84 @@ func (q *Queries) CreateTotals(ctx context.Context, arg CreateTotalsParams) erro
 	return err
 }
 
-const getPlayer = `-- name: GetPlayer :one
+const getPlayerAdvanced = `-- name: GetPlayerAdvanced :many
+select advanced.id, advanced.per, advanced.ts_percent, advanced.p_ar3, advanced.f_tr, advanced.orb_percent, advanced.drb_percent, advanced.trb_percent, advanced.ast_percent, advanced.stl_percent, advanced.blk_percent, advanced.tov_percent, advanced.usg_percent, advanced.ows, advanced.dws, advanced.ws, advanced.ws48, advanced.obpm, advanced.dbpm, advanced.bpm, advanced.vorp from player
+  inner join player_advanced on player.id = player_advanced.player_id
+  inner join advanced on player_advanced.advanced_id = advanced.id
+  where player.id = $1
+  and player_advanced.season_year between $2 and $3
+`
+
+type GetPlayerAdvancedParams struct {
+	ID           int32 `json:"id"`
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+func (q *Queries) GetPlayerAdvanced(ctx context.Context, arg GetPlayerAdvancedParams) ([]Advanced, error) {
+	rows, err := q.db.Query(ctx, getPlayerAdvanced, arg.ID, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Advanced
+	for rows.Next() {
+		var i Advanced
+		if err := rows.Scan(
+			&i.ID,
+			&i.Per,
+			&i.TsPercent,
+			&i.PAr3,
+			&i.FTr,
+			&i.OrbPercent,
+			&i.DrbPercent,
+			&i.TrbPercent,
+			&i.AstPercent,
+			&i.StlPercent,
+			&i.BlkPercent,
+			&i.TovPercent,
+			&i.UsgPercent,
+			&i.Ows,
+			&i.Dws,
+			&i.Ws,
+			&i.Ws48,
+			&i.Obpm,
+			&i.Dbpm,
+			&i.Bpm,
+			&i.Vorp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerById = `-- name: GetPlayerById :one
 select id, fullname from player where id = $1
 `
 
-func (q *Queries) GetPlayer(ctx context.Context, id int32) (Player, error) {
-	row := q.db.QueryRow(ctx, getPlayer, id)
+func (q *Queries) GetPlayerById(ctx context.Context, id int32) (Player, error) {
+	row := q.db.QueryRow(ctx, getPlayerById, id)
 	var i Player
 	err := row.Scan(&i.ID, &i.Fullname)
 	return i, err
 }
 
 const getPlayerBySearch = `-- name: GetPlayerBySearch :many
-select id, fullname from player where fullname like '%' || $1 || '%'
+select
+    id, fullname
+from
+    player
+where
+    lower(fullName) like '%' || lower($1) || '%'
 `
 
-func (q *Queries) GetPlayerBySearch(ctx context.Context, dollar_1 pgtype.Text) ([]Player, error) {
-	rows, err := q.db.Query(ctx, getPlayerBySearch, dollar_1)
+func (q *Queries) GetPlayerBySearch(ctx context.Context, lower string) ([]Player, error) {
+	rows, err := q.db.Query(ctx, getPlayerBySearch, lower)
 	if err != nil {
 		return nil, err
 	}
@@ -1211,260 +1272,198 @@ func (q *Queries) GetPlayerBySearch(ctx context.Context, dollar_1 pgtype.Text) (
 	return items, nil
 }
 
-const getPlayerStats = `-- name: GetPlayerStats :many
-select player.id, player.fullName, player_totals.season_year, totals.gp, totals.gs, totals.mp as total_mp, totals.fg as totals_fg, totals.fga as totals_fga, totals.p3 as totals_p3, totals.pa3 as totals_pa3,
-totals.p2 as totals_p2, totals.pa2 as totals_pa2, totals.ft as totals_ft, totals.fta as totals_fta, totals.orb as totals_orb, totals.drb as totals_drb, totals.trb as totals_trb, totals.stl as totals_stl,
-totals.blk as totals_blk, totals.ast as totals_ast, totals.tov as totals_tov, totals.pf as totals_pf, totals.pts as totals_pts, per_game.mp as per_game_mp, per_game.fg as per_game_fg, per_game.fga as per_game_fga,
-per_game.fg_percent as per_game_fg_percent, per_game.p3 as per_game_p3, per_game.pa3 as per_game_pa3, per_game.p_percent3 as per_game_p_percent3, per_game.p2 as per_game_p2, per_game.pa2 as per_game_pa2, per_game.p_percent2 as per_game_p_percent2,
-per_game.efg_percent as per_game_efg_percent, per_game.ft as per_game_ft, per_game.fta as per_game_fta, per_game.ft_percent as per_game_ft_percent, per_game.orb as per_game_orb, per_game.drb as per_game_drb, per_game.trb as per_game_trb, per_game.ast as per_game_ast,
-per_game.stl as per_game_stl, per_game.blk as per_game_blk, per_game.tov as per_game_tov, per_game.pf as per_game_pf, per_game.pts as per_game_pts, per_100_possesions.fg as per_100_possesions_fg, per_100_possesions.fga as per_100_possesions_fga, per_100_possesions.p3 as per_100_possesions_p3,
-per_100_possesions.pa3 as per_100_possesions_pa3, per_100_possesions.p2 as per_100_possesions_p2, per_100_possesions.pa2 as per_100_possesions_pa2, per_100_possesions.ft as per_100_possesions_ft, per_100_possesions.fta as per_100_possesions_fta, per_100_possesions.orb as per_100_possesions_orb,
-per_100_possesions.drb as per_100_possesions_drb, per_100_possesions.trb as per_100_possesions_trb, per_100_possesions.stl as per_100_possesions_stl, per_100_possesions.blk as per_100_possesions_blk, per_100_possesions.ast as per_100_possesions_ast, per_100_possesions.tov as per_100_possesions_tov,
-per_100_possesions.pf as per_100_possesions_pf, per_100_possesions.pts as per_100_possesions_pts, per_100_possesions.o_rtg as per_100_possesions_o_rtg, per_100_possesions.d_rtg as per_100_possesions_d_rtg, per_36.fg as per_36_fg, per_36.fga as per_36_fga, per_36.p3 as per_36_p3,
-per_36.pa3 as per_36_pa3, per_36.p2 as per_36_p2, per_36.pa2 as per_36_pa2, per_36.ft as per_36_ft, per_36.fta as per_36_fta, per_36.orb as per_36_orb, per_36.drb as per_36_drb, per_36.trb as per_36_trb, per_36.stl as per_36_stl, per_36.blk as per_36_blk,
-per_36.ast as per_36_ast, per_36.tov as per_36_tov, per_36.pf as per_36_pf, per_36.pts as per_36_pts, player_shooting.avg_dist_fga, player_shooting.percent_fga_from_2p_range,
-player_shooting.percent_fga_from_0_3_range, player_shooting.percent_fga_from_3_10_range, player_shooting.percent_fga_from_10_16_range,
-player_shooting.percent_fga_from_16_3p_range, player_shooting.percent_fga_from_3p_range, player_shooting.fg_percent_from_2p_range,
-player_shooting.fg_percent_from_0_3_range, player_shooting.fg_percent_from_3_10_range, player_shooting.fg_percent_from_10_16_range,
-player_shooting.fg_percent_from_16_3p_range, player_shooting.fg_percent_from_3p_range, player_shooting.percent_assisted_2p_fg,
-player_shooting.percent_assisted_3p_fg, player_shooting.percent_dunks_of_fga, player_shooting.num_of_dunks, player_shooting.percent_corner_3s_of_3pa ,
-player_shooting.corner_3_point_percent, player_shooting.num_heaves_attempted, player_shooting.num_heaves_made, advanced."per", advanced.ts_percent,
-advanced.p_ar3, advanced.f_tr, advanced.orb_percent, advanced.drb_percent, advanced.trb_percent, advanced.ast_percent, advanced.stl_percent,
-advanced.blk_percent, advanced.tov_percent, advanced.usg_percent, advanced.ows, advanced.dws, advanced.ws, advanced.ws48, advanced.obpm,
-advanced.dbpm, advanced.bpm, advanced.vorp
-from player left join player_totals on player.id = totals.player_id left join totals on totals.id = player_totals.total_id
-left join player_per_game on player.id = player_per_game.player_id left join per_game on per_game.id = player_per_game.per_game_id
-left join player_per_100_possesions on player.id = player_per_100_possesions.player_id left join per_100_possesions on per_100_possesions.id = player_per_100_possesions.per_100_id
-left join per_36 on per_36.player_id = player.id left join player_shooting on player_shooting.player_id = player.id
-left join player_advanced on player_advanced.player_id = player_id left join advanced on advanced.id = player_advanced.advanced_id
-where player.id = $1 and per_36.season_year between $2 and $3 and player_totals.season_year between $2 and $3 and player_per_game.season_year between $2 and $3
-and player_per_100_possesions.season_year between $2 and $3 and player_shooting.season_year between $2 and $3 and player_advanced.season_year between $2 and $3
+const getPlayerPer100 = `-- name: GetPlayerPer100 :many
+select per_100_possesions.id, per_100_possesions.fg, per_100_possesions.fga, per_100_possesions.p3, per_100_possesions.pa3, per_100_possesions.p2, per_100_possesions.pa2, per_100_possesions.ft, per_100_possesions.fta, per_100_possesions.orb, per_100_possesions.drb, per_100_possesions.trb, per_100_possesions.stl, per_100_possesions.blk, per_100_possesions.ast, per_100_possesions.tov, per_100_possesions.pf, per_100_possesions.pts, per_100_possesions.o_rtg, per_100_possesions.d_rtg from player
+  inner join player_per_100_possesions on player.id = player_per_100_possesions.player_id
+  inner join per_100_possesions on player_per_100_possesions.per_100_id = per_100_possesions.id
+  where player.id = $1
+  and player_per_100_possesions.season_year between $2 and $3
 `
 
-type GetPlayerStatsParams struct {
+type GetPlayerPer100Params struct {
 	ID           int32 `json:"id"`
 	SeasonYear   int32 `json:"season_year"`
 	SeasonYear_2 int32 `json:"season_year_2"`
 }
 
-type GetPlayerStatsRow struct {
-	ID                      int32         `json:"id"`
-	Fullname                string        `json:"fullname"`
-	SeasonYear              pgtype.Int4   `json:"season_year"`
-	Gp                      pgtype.Int4   `json:"gp"`
-	Gs                      pgtype.Int4   `json:"gs"`
-	TotalMp                 pgtype.Int4   `json:"total_mp"`
-	TotalsFg                pgtype.Int4   `json:"totals_fg"`
-	TotalsFga               pgtype.Int4   `json:"totals_fga"`
-	TotalsP3                pgtype.Int4   `json:"totals_p3"`
-	TotalsPa3               pgtype.Int4   `json:"totals_pa3"`
-	TotalsP2                pgtype.Int4   `json:"totals_p2"`
-	TotalsPa2               pgtype.Int4   `json:"totals_pa2"`
-	TotalsFt                pgtype.Int4   `json:"totals_ft"`
-	TotalsFta               pgtype.Int4   `json:"totals_fta"`
-	TotalsOrb               pgtype.Int4   `json:"totals_orb"`
-	TotalsDrb               pgtype.Int4   `json:"totals_drb"`
-	TotalsTrb               pgtype.Int4   `json:"totals_trb"`
-	TotalsStl               pgtype.Int4   `json:"totals_stl"`
-	TotalsBlk               pgtype.Int4   `json:"totals_blk"`
-	TotalsAst               pgtype.Int4   `json:"totals_ast"`
-	TotalsTov               pgtype.Int4   `json:"totals_tov"`
-	TotalsPf                pgtype.Int4   `json:"totals_pf"`
-	TotalsPts               pgtype.Int4   `json:"totals_pts"`
-	PerGameMp               pgtype.Float4 `json:"per_game_mp"`
-	PerGameFg               pgtype.Float4 `json:"per_game_fg"`
-	PerGameFga              pgtype.Float4 `json:"per_game_fga"`
-	PerGameFgPercent        pgtype.Float4 `json:"per_game_fg_percent"`
-	PerGameP3               pgtype.Int4   `json:"per_game_p3"`
-	PerGamePa3              pgtype.Int4   `json:"per_game_pa3"`
-	PerGamePPercent3        pgtype.Float4 `json:"per_game_p_percent3"`
-	PerGameP2               pgtype.Int4   `json:"per_game_p2"`
-	PerGamePa2              pgtype.Int4   `json:"per_game_pa2"`
-	PerGamePPercent2        pgtype.Float4 `json:"per_game_p_percent2"`
-	PerGameEfgPercent       pgtype.Float4 `json:"per_game_efg_percent"`
-	PerGameFt               pgtype.Float4 `json:"per_game_ft"`
-	PerGameFta              pgtype.Float4 `json:"per_game_fta"`
-	PerGameFtPercent        pgtype.Float4 `json:"per_game_ft_percent"`
-	PerGameOrb              pgtype.Float4 `json:"per_game_orb"`
-	PerGameDrb              pgtype.Float4 `json:"per_game_drb"`
-	PerGameTrb              pgtype.Float4 `json:"per_game_trb"`
-	PerGameAst              pgtype.Float4 `json:"per_game_ast"`
-	PerGameStl              pgtype.Float4 `json:"per_game_stl"`
-	PerGameBlk              pgtype.Float4 `json:"per_game_blk"`
-	PerGameTov              pgtype.Float4 `json:"per_game_tov"`
-	PerGamePf               pgtype.Float4 `json:"per_game_pf"`
-	PerGamePts              pgtype.Float4 `json:"per_game_pts"`
-	Per100PossesionsFg      pgtype.Float4 `json:"per_100_possesions_fg"`
-	Per100PossesionsFga     pgtype.Float4 `json:"per_100_possesions_fga"`
-	Per100PossesionsP3      pgtype.Int4   `json:"per_100_possesions_p3"`
-	Per100PossesionsPa3     pgtype.Int4   `json:"per_100_possesions_pa3"`
-	Per100PossesionsP2      pgtype.Int4   `json:"per_100_possesions_p2"`
-	Per100PossesionsPa2     pgtype.Int4   `json:"per_100_possesions_pa2"`
-	Per100PossesionsFt      pgtype.Float4 `json:"per_100_possesions_ft"`
-	Per100PossesionsFta     pgtype.Float4 `json:"per_100_possesions_fta"`
-	Per100PossesionsOrb     pgtype.Float4 `json:"per_100_possesions_orb"`
-	Per100PossesionsDrb     pgtype.Float4 `json:"per_100_possesions_drb"`
-	Per100PossesionsTrb     pgtype.Float4 `json:"per_100_possesions_trb"`
-	Per100PossesionsStl     pgtype.Float4 `json:"per_100_possesions_stl"`
-	Per100PossesionsBlk     pgtype.Float4 `json:"per_100_possesions_blk"`
-	Per100PossesionsAst     pgtype.Float4 `json:"per_100_possesions_ast"`
-	Per100PossesionsTov     pgtype.Float4 `json:"per_100_possesions_tov"`
-	Per100PossesionsPf      pgtype.Float4 `json:"per_100_possesions_pf"`
-	Per100PossesionsPts     pgtype.Float4 `json:"per_100_possesions_pts"`
-	Per100PossesionsORtg    pgtype.Float4 `json:"per_100_possesions_o_rtg"`
-	Per100PossesionsDRtg    pgtype.Float4 `json:"per_100_possesions_d_rtg"`
-	Per36Fg                 pgtype.Float4 `json:"per_36_fg"`
-	Per36Fga                pgtype.Float4 `json:"per_36_fga"`
-	Per36P3                 pgtype.Int4   `json:"per_36_p3"`
-	Per36Pa3                pgtype.Int4   `json:"per_36_pa3"`
-	Per36P2                 pgtype.Int4   `json:"per_36_p2"`
-	Per36Pa2                pgtype.Int4   `json:"per_36_pa2"`
-	Per36Ft                 pgtype.Float4 `json:"per_36_ft"`
-	Per36Fta                pgtype.Float4 `json:"per_36_fta"`
-	Per36Orb                pgtype.Float4 `json:"per_36_orb"`
-	Per36Drb                pgtype.Float4 `json:"per_36_drb"`
-	Per36Trb                pgtype.Float4 `json:"per_36_trb"`
-	Per36Stl                pgtype.Float4 `json:"per_36_stl"`
-	Per36Blk                pgtype.Float4 `json:"per_36_blk"`
-	Per36Ast                pgtype.Float4 `json:"per_36_ast"`
-	Per36Tov                pgtype.Float4 `json:"per_36_tov"`
-	Per36Pf                 pgtype.Float4 `json:"per_36_pf"`
-	Per36Pts                pgtype.Float4 `json:"per_36_pts"`
-	AvgDistFga              pgtype.Float4 `json:"avg_dist_fga"`
-	PercentFgaFrom2pRange   pgtype.Float4 `json:"percent_fga_from_2p_range"`
-	PercentFgaFrom03Range   pgtype.Float4 `json:"percent_fga_from_0_3_range"`
-	PercentFgaFrom310Range  pgtype.Float4 `json:"percent_fga_from_3_10_range"`
-	PercentFgaFrom1016Range pgtype.Float4 `json:"percent_fga_from_10_16_range"`
-	PercentFgaFrom163pRange pgtype.Float4 `json:"percent_fga_from_16_3p_range"`
-	PercentFgaFrom3pRange   pgtype.Float4 `json:"percent_fga_from_3p_range"`
-	FgPercentFrom2pRange    pgtype.Float4 `json:"fg_percent_from_2p_range"`
-	FgPercentFrom03Range    pgtype.Float4 `json:"fg_percent_from_0_3_range"`
-	FgPercentFrom310Range   pgtype.Float4 `json:"fg_percent_from_3_10_range"`
-	FgPercentFrom1016Range  pgtype.Float4 `json:"fg_percent_from_10_16_range"`
-	FgPercentFrom163pRange  pgtype.Float4 `json:"fg_percent_from_16_3p_range"`
-	FgPercentFrom3pRange    pgtype.Float4 `json:"fg_percent_from_3p_range"`
-	PercentAssisted2pFg     pgtype.Float4 `json:"percent_assisted_2p_fg"`
-	PercentAssisted3pFg     pgtype.Float4 `json:"percent_assisted_3p_fg"`
-	PercentDunksOfFga       pgtype.Float4 `json:"percent_dunks_of_fga"`
-	NumOfDunks              pgtype.Float4 `json:"num_of_dunks"`
-	PercentCorner3sOf3pa    pgtype.Float4 `json:"percent_corner_3s_of_3pa"`
-	Corner3PointPercent     pgtype.Float4 `json:"corner_3_point_percent"`
-	NumHeavesAttempted      pgtype.Int4   `json:"num_heaves_attempted"`
-	NumHeavesMade           pgtype.Int4   `json:"num_heaves_made"`
-	Per                     pgtype.Float4 `json:"per"`
-	TsPercent               pgtype.Float4 `json:"ts_percent"`
-	PAr3                    pgtype.Float4 `json:"p_ar3"`
-	FTr                     pgtype.Float4 `json:"f_tr"`
-	OrbPercent              pgtype.Float4 `json:"orb_percent"`
-	DrbPercent              pgtype.Float4 `json:"drb_percent"`
-	TrbPercent              pgtype.Float4 `json:"trb_percent"`
-	AstPercent              pgtype.Float4 `json:"ast_percent"`
-	StlPercent              pgtype.Float4 `json:"stl_percent"`
-	BlkPercent              pgtype.Float4 `json:"blk_percent"`
-	TovPercent              pgtype.Float4 `json:"tov_percent"`
-	UsgPercent              pgtype.Float4 `json:"usg_percent"`
-	Ows                     pgtype.Float4 `json:"ows"`
-	Dws                     pgtype.Float4 `json:"dws"`
-	Ws                      pgtype.Float4 `json:"ws"`
-	Ws48                    pgtype.Float4 `json:"ws48"`
-	Obpm                    pgtype.Float4 `json:"obpm"`
-	Dbpm                    pgtype.Float4 `json:"dbpm"`
-	Bpm                     pgtype.Float4 `json:"bpm"`
-	Vorp                    pgtype.Float4 `json:"vorp"`
-}
-
-func (q *Queries) GetPlayerStats(ctx context.Context, arg GetPlayerStatsParams) ([]GetPlayerStatsRow, error) {
-	rows, err := q.db.Query(ctx, getPlayerStats, arg.ID, arg.SeasonYear, arg.SeasonYear_2)
+func (q *Queries) GetPlayerPer100(ctx context.Context, arg GetPlayerPer100Params) ([]Per100Possesion, error) {
+	rows, err := q.db.Query(ctx, getPlayerPer100, arg.ID, arg.SeasonYear, arg.SeasonYear_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetPlayerStatsRow
+	var items []Per100Possesion
 	for rows.Next() {
-		var i GetPlayerStatsRow
+		var i Per100Possesion
 		if err := rows.Scan(
 			&i.ID,
-			&i.Fullname,
+			&i.Fg,
+			&i.Fga,
+			&i.P3,
+			&i.Pa3,
+			&i.P2,
+			&i.Pa2,
+			&i.Ft,
+			&i.Fta,
+			&i.Orb,
+			&i.Drb,
+			&i.Trb,
+			&i.Stl,
+			&i.Blk,
+			&i.Ast,
+			&i.Tov,
+			&i.Pf,
+			&i.Pts,
+			&i.ORtg,
+			&i.DRtg,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerPer36 = `-- name: GetPlayerPer36 :many
+select player_per_36.player_id, player_per_36.season_year, player_per_36.fg, player_per_36.fga, player_per_36.p3, player_per_36.pa3, player_per_36.p2, player_per_36.pa2, player_per_36.ft, player_per_36.fta, player_per_36.orb, player_per_36.drb, player_per_36.trb, player_per_36.stl, player_per_36.blk, player_per_36.ast, player_per_36.tov, player_per_36.pf, player_per_36.pts from player
+  inner join player_per_36 on player_per_36.player_id = player.id
+  where player.id = $1
+  and player_per_36.season_year between $2 and $3
+`
+
+type GetPlayerPer36Params struct {
+	ID           int32 `json:"id"`
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+func (q *Queries) GetPlayerPer36(ctx context.Context, arg GetPlayerPer36Params) ([]PlayerPer36, error) {
+	rows, err := q.db.Query(ctx, getPlayerPer36, arg.ID, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PlayerPer36
+	for rows.Next() {
+		var i PlayerPer36
+		if err := rows.Scan(
+			&i.PlayerID,
 			&i.SeasonYear,
-			&i.Gp,
-			&i.Gs,
-			&i.TotalMp,
-			&i.TotalsFg,
-			&i.TotalsFga,
-			&i.TotalsP3,
-			&i.TotalsPa3,
-			&i.TotalsP2,
-			&i.TotalsPa2,
-			&i.TotalsFt,
-			&i.TotalsFta,
-			&i.TotalsOrb,
-			&i.TotalsDrb,
-			&i.TotalsTrb,
-			&i.TotalsStl,
-			&i.TotalsBlk,
-			&i.TotalsAst,
-			&i.TotalsTov,
-			&i.TotalsPf,
-			&i.TotalsPts,
-			&i.PerGameMp,
-			&i.PerGameFg,
-			&i.PerGameFga,
-			&i.PerGameFgPercent,
-			&i.PerGameP3,
-			&i.PerGamePa3,
-			&i.PerGamePPercent3,
-			&i.PerGameP2,
-			&i.PerGamePa2,
-			&i.PerGamePPercent2,
-			&i.PerGameEfgPercent,
-			&i.PerGameFt,
-			&i.PerGameFta,
-			&i.PerGameFtPercent,
-			&i.PerGameOrb,
-			&i.PerGameDrb,
-			&i.PerGameTrb,
-			&i.PerGameAst,
-			&i.PerGameStl,
-			&i.PerGameBlk,
-			&i.PerGameTov,
-			&i.PerGamePf,
-			&i.PerGamePts,
-			&i.Per100PossesionsFg,
-			&i.Per100PossesionsFga,
-			&i.Per100PossesionsP3,
-			&i.Per100PossesionsPa3,
-			&i.Per100PossesionsP2,
-			&i.Per100PossesionsPa2,
-			&i.Per100PossesionsFt,
-			&i.Per100PossesionsFta,
-			&i.Per100PossesionsOrb,
-			&i.Per100PossesionsDrb,
-			&i.Per100PossesionsTrb,
-			&i.Per100PossesionsStl,
-			&i.Per100PossesionsBlk,
-			&i.Per100PossesionsAst,
-			&i.Per100PossesionsTov,
-			&i.Per100PossesionsPf,
-			&i.Per100PossesionsPts,
-			&i.Per100PossesionsORtg,
-			&i.Per100PossesionsDRtg,
-			&i.Per36Fg,
-			&i.Per36Fga,
-			&i.Per36P3,
-			&i.Per36Pa3,
-			&i.Per36P2,
-			&i.Per36Pa2,
-			&i.Per36Ft,
-			&i.Per36Fta,
-			&i.Per36Orb,
-			&i.Per36Drb,
-			&i.Per36Trb,
-			&i.Per36Stl,
-			&i.Per36Blk,
-			&i.Per36Ast,
-			&i.Per36Tov,
-			&i.Per36Pf,
-			&i.Per36Pts,
+			&i.Fg,
+			&i.Fga,
+			&i.P3,
+			&i.Pa3,
+			&i.P2,
+			&i.Pa2,
+			&i.Ft,
+			&i.Fta,
+			&i.Orb,
+			&i.Drb,
+			&i.Trb,
+			&i.Stl,
+			&i.Blk,
+			&i.Ast,
+			&i.Tov,
+			&i.Pf,
+			&i.Pts,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerPerGame = `-- name: GetPlayerPerGame :many
+select per_game.id, per_game.mp, per_game.fg, per_game.fga, per_game.fg_percent, per_game.p3, per_game.pa3, per_game.p_percent3, per_game.p2, per_game.pa2, per_game.p_percent2, per_game.efg_percent, per_game.ft, per_game.fta, per_game.ft_percent, per_game.orb, per_game.drb, per_game.trb, per_game.ast, per_game.stl, per_game.blk, per_game.tov, per_game.pf, per_game.pts from player
+  inner join player_per_game on player.id = player_per_game.player_id
+  inner join per_game on player_per_game.per_game_id = per_game.id
+  where player.id = $1
+  and player_per_game.season_year between $2 and $3
+`
+
+type GetPlayerPerGameParams struct {
+	ID           int32 `json:"id"`
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+func (q *Queries) GetPlayerPerGame(ctx context.Context, arg GetPlayerPerGameParams) ([]PerGame, error) {
+	rows, err := q.db.Query(ctx, getPlayerPerGame, arg.ID, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PerGame
+	for rows.Next() {
+		var i PerGame
+		if err := rows.Scan(
+			&i.ID,
+			&i.Mp,
+			&i.Fg,
+			&i.Fga,
+			&i.FgPercent,
+			&i.P3,
+			&i.Pa3,
+			&i.PPercent3,
+			&i.P2,
+			&i.Pa2,
+			&i.PPercent2,
+			&i.EfgPercent,
+			&i.Ft,
+			&i.Fta,
+			&i.FtPercent,
+			&i.Orb,
+			&i.Drb,
+			&i.Trb,
+			&i.Ast,
+			&i.Stl,
+			&i.Blk,
+			&i.Tov,
+			&i.Pf,
+			&i.Pts,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerShooting = `-- name: GetPlayerShooting :many
+select player_shooting.season_year, player_shooting.player_id, player_shooting.avg_dist_fga, player_shooting.percent_fga_from_2p_range, player_shooting.percent_fga_from_0_3_range, player_shooting.percent_fga_from_3_10_range, player_shooting.percent_fga_from_10_16_range, player_shooting.percent_fga_from_16_3p_range, player_shooting.percent_fga_from_3p_range, player_shooting.fg_percent_from_2p_range, player_shooting.fg_percent_from_0_3_range, player_shooting.fg_percent_from_3_10_range, player_shooting.fg_percent_from_10_16_range, player_shooting.fg_percent_from_16_3p_range, player_shooting.fg_percent_from_3p_range, player_shooting.percent_assisted_2p_fg, player_shooting.percent_assisted_3p_fg, player_shooting.percent_dunks_of_fga, player_shooting.num_of_dunks, player_shooting.percent_corner_3s_of_3pa, player_shooting.corner_3_point_percent, player_shooting.num_heaves_attempted, player_shooting.num_heaves_made from player
+  inner join player_shooting on player_shooting.player_id = player.id
+  where player.id = $1
+  and player_shooting.season_year between $2 and $3
+`
+
+type GetPlayerShootingParams struct {
+	ID           int32 `json:"id"`
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+func (q *Queries) GetPlayerShooting(ctx context.Context, arg GetPlayerShootingParams) ([]PlayerShooting, error) {
+	rows, err := q.db.Query(ctx, getPlayerShooting, arg.ID, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PlayerShooting
+	for rows.Next() {
+		var i PlayerShooting
+		if err := rows.Scan(
+			&i.SeasonYear,
+			&i.PlayerID,
 			&i.AvgDistFga,
 			&i.PercentFgaFrom2pRange,
 			&i.PercentFgaFrom03Range,
@@ -1486,26 +1485,62 @@ func (q *Queries) GetPlayerStats(ctx context.Context, arg GetPlayerStatsParams) 
 			&i.Corner3PointPercent,
 			&i.NumHeavesAttempted,
 			&i.NumHeavesMade,
-			&i.Per,
-			&i.TsPercent,
-			&i.PAr3,
-			&i.FTr,
-			&i.OrbPercent,
-			&i.DrbPercent,
-			&i.TrbPercent,
-			&i.AstPercent,
-			&i.StlPercent,
-			&i.BlkPercent,
-			&i.TovPercent,
-			&i.UsgPercent,
-			&i.Ows,
-			&i.Dws,
-			&i.Ws,
-			&i.Ws48,
-			&i.Obpm,
-			&i.Dbpm,
-			&i.Bpm,
-			&i.Vorp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerTotals = `-- name: GetPlayerTotals :many
+select totals.id, totals.gp, totals.gs, totals.mp, totals.fg, totals.fga, totals.p3, totals.pa3, totals.p2, totals.pa2, totals.ft, totals.fta, totals.orb, totals.drb, totals.trb, totals.stl, totals.blk, totals.ast, totals.tov, totals.pf, totals.pts from player 
+inner join player_totals on player.id = player_totals.player_id
+inner join totals on totals.id = player_totals.total_id
+where player.id = $1
+and player_totals.season_year between $2 and $3
+`
+
+type GetPlayerTotalsParams struct {
+	ID           int32 `json:"id"`
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+func (q *Queries) GetPlayerTotals(ctx context.Context, arg GetPlayerTotalsParams) ([]Total, error) {
+	rows, err := q.db.Query(ctx, getPlayerTotals, arg.ID, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Total
+	for rows.Next() {
+		var i Total
+		if err := rows.Scan(
+			&i.ID,
+			&i.Gp,
+			&i.Gs,
+			&i.Mp,
+			&i.Fg,
+			&i.Fga,
+			&i.P3,
+			&i.Pa3,
+			&i.P2,
+			&i.Pa2,
+			&i.Ft,
+			&i.Fta,
+			&i.Orb,
+			&i.Drb,
+			&i.Trb,
+			&i.Stl,
+			&i.Blk,
+			&i.Ast,
+			&i.Tov,
+			&i.Pf,
+			&i.Pts,
 		); err != nil {
 			return nil, err
 		}

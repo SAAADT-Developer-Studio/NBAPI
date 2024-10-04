@@ -99,28 +99,6 @@ type Per100Possesion struct {
 	DRtg pgtype.Float4 `json:"d_rtg"`
 }
 
-type Per36 struct {
-	PlayerID   int32   `json:"player_id"`
-	SeasonYear int32   `json:"season_year"`
-	Fg         float32 `json:"fg"`
-	Fga        float32 `json:"fga"`
-	P3         int32   `json:"p3"`
-	Pa3        int32   `json:"pa3"`
-	P2         int32   `json:"p2"`
-	Pa2        int32   `json:"pa2"`
-	Ft         float32 `json:"ft"`
-	Fta        float32 `json:"fta"`
-	Orb        float32 `json:"orb"`
-	Drb        float32 `json:"drb"`
-	Trb        float32 `json:"trb"`
-	Stl        float32 `json:"stl"`
-	Blk        float32 `json:"blk"`
-	Ast        float32 `json:"ast"`
-	Tov        float32 `json:"tov"`
-	Pf         float32 `json:"pf"`
-	Pts        float32 `json:"pts"`
-}
-
 type PerGame struct {
 	ID         int32   `json:"id"`
 	Mp         float32 `json:"mp"`
@@ -173,6 +151,28 @@ type PlayerPer100Possesion struct {
 	PlayerID   int32 `json:"player_id"`
 	Per100ID   int32 `json:"per_100_id"`
 	SeasonYear int32 `json:"season_year"`
+}
+
+type PlayerPer36 struct {
+	PlayerID   int32   `json:"player_id"`
+	SeasonYear int32   `json:"season_year"`
+	Fg         float32 `json:"fg"`
+	Fga        float32 `json:"fga"`
+	P3         int32   `json:"p3"`
+	Pa3        int32   `json:"pa3"`
+	P2         int32   `json:"p2"`
+	Pa2        int32   `json:"pa2"`
+	Ft         float32 `json:"ft"`
+	Fta        float32 `json:"fta"`
+	Orb        float32 `json:"orb"`
+	Drb        float32 `json:"drb"`
+	Trb        float32 `json:"trb"`
+	Stl        float32 `json:"stl"`
+	Blk        float32 `json:"blk"`
+	Ast        float32 `json:"ast"`
+	Tov        float32 `json:"tov"`
+	Pf         float32 `json:"pf"`
+	Pts        float32 `json:"pts"`
 }
 
 type PlayerPerGame struct {

@@ -123,7 +123,7 @@ CREATE TABLE all_teams_voting (
     PRIMARY KEY (player_id, season_year)
 );
 
-CREATE TABLE per_36 (
+CREATE TABLE player_per_36 (
     player_id INT NOT NULL REFERENCES player (id),
     season_year INT NOT NULL,
     fg REAL NOT NULL,

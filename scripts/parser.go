@@ -198,11 +198,11 @@ func seedTeamTotals() {
 
 func seedPlayerTotals() {
 	ctx := context.Background()
-	for _, row := range getCSVRows("TT.csv") {
+	for _, row := range getCSVRows("PT.csv") {
 		database.Queries.CreatePlayerTotals(ctx, sqlc.CreatePlayerTotalsParams{
-			PlayerID:   parseInt(row[4]),
+			PlayerID:   parseInt(row[3]),
 			TotalID:    parseInt(row[0]),
-			SeasonYear: parseInt(row[1]),
+			SeasonYear: parseInt(row[2]),
 		})
 	}
 }
