@@ -7,8 +7,6 @@ package sqlc
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getTeam = `-- name: GetTeam :one
@@ -182,11 +180,11 @@ select
 from
   team
 where
-  fullname like '%' || $1 || '%'
+  lower(fullname) like '%' || lower($1) || '%'
 `
 
-func (q *Queries) GetTeams(ctx context.Context, dollar_1 pgtype.Text) ([]Team, error) {
-	rows, err := q.db.Query(ctx, getTeams, dollar_1)
+func (q *Queries) GetTeams(ctx context.Context, lower string) ([]Team, error) {
+	rows, err := q.db.Query(ctx, getTeams, lower)
 	if err != nil {
 		return nil, err
 	}

@@ -8,14 +8,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/sirupsen/logrus"
 )
 
 func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	search := r.URL.Query().Get("search")
-	teams, err := database.Queries.GetTeams(ctx, pgtype.Text{String: search, Valid: true})
+	teams, err := database.Queries.GetTeams(ctx, search)
 
 	if err != nil {
 		logrus.Error(err)
