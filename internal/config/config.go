@@ -8,6 +8,7 @@ import (
 )
 
 type AppConfig struct {
+	AppEnv     string `koanf:"APP_ENV" validate:"required,oneof=local production"`
 	DBDatabase string `koanf:"DB_DATABASE" validate:"required"`
 	DBUsername string `koanf:"DB_USERNAME" validate:"required"`
 	DBPassword string `koanf:"DB_PASSWORD" validate:"required"`
@@ -21,7 +22,6 @@ var validate *validator.Validate
 var Config AppConfig
 
 func init() {
-	logrus.Info("initing config")
 	k := koanf.New(".")
 	validate = validator.New(validator.WithRequiredStructEnabled())
 	k.Load(env.Provider("", "", func(s string) string { return s }), nil)
@@ -29,6 +29,7 @@ func init() {
 	err := validate.Struct(Config)
 
 	if err != nil {
+		logrus.Error("Invalid environment variables")
 		logrus.Fatal(err)
 	}
 }

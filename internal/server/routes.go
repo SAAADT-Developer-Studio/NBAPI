@@ -18,6 +18,7 @@ import (
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
+	// TODO: gracefull shutdown
 
 	r.Use(httprate.Limit(
 		100,
@@ -33,11 +34,16 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.StripSlashes)
+	r.Use(middleware.Compress(5))
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
+
+	if config.Config.AppEnv == "local" {
+		r.Mount("/debug", middleware.Profiler())
+	}
 
 	r.Get("/", s.HelloWorldHandler)
 	r.Route("/players", player.Router)
