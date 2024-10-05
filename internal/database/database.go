@@ -1,11 +1,10 @@
 package database
 
 import (
+	"NBAPI/internal/config"
 	"NBAPI/internal/sqlc"
 	"context"
 	"fmt"
-	"log"
-	"os"
 	"strconv"
 	"time"
 
@@ -30,13 +29,8 @@ type Service interface {
 type Database = *pgxpool.Pool
 
 var (
-	database = os.Getenv("DB_DATABASE")
-	password = os.Getenv("DB_PASSWORD")
-	username = os.Getenv("DB_USERNAME")
-	port     = os.Getenv("DB_PORT")
-	host     = os.Getenv("DB_HOST")
-	DB       Database
-	Queries  *sqlc.Queries
+	DB      Database
+	Queries *sqlc.Queries
 )
 
 type PgTracer struct {
@@ -57,6 +51,14 @@ func (pt *PgTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.
 }
 
 func Init() {
+	appConf := config.Config
+
+	username := appConf.DBUsername
+	password := appConf.DBPassword
+	host := appConf.DBHost
+	port := appConf.DBPort
+	database := appConf.DBDatabase
+
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, password, host, port, database)
 	logrus.Info("Connecting to database ", connStr)
 
@@ -73,8 +75,9 @@ func Init() {
 	conn, err := pgxpool.NewWithConfig(ctx, config)
 
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
+	logrus.Info("Connected!")
 	queries := sqlc.New(conn)
 	DB = conn
 	Queries = queries
@@ -92,7 +95,7 @@ func Health() map[string]string {
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
-		log.Fatalf("db down: %v", err) // Log the error and terminate the program
+		logrus.Fatalf("db down: %v", err) // Log the error and terminate the program
 		return stats
 	}
 
@@ -135,6 +138,6 @@ func Health() map[string]string {
 // If the connection is successfully closed, it returns nil.
 // If an error occurs while closing the connection, it returns the error.
 func Close() {
-	log.Printf("Disconnected from database: %s", database)
+	logrus.Printf("Disconnected from database: %s", config.Config.DBDatabase)
 	DB.Close()
 }

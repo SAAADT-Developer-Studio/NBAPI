@@ -1,6 +1,7 @@
 package database
 
 import (
+	"NBAPI/internal/config"
 	"context"
 	"log"
 	"testing"
@@ -33,9 +34,9 @@ func mustStartPostgresContainer() (func(context.Context) error, error) {
 		return nil, err
 	}
 
-	database = dbName
-	password = dbPwd
-	username = dbUser
+	config.Config.DBDatabase = dbName
+	config.Config.DBPassword = dbPwd
+	config.Config.DBUsername = dbUser
 
 	dbHost, err := dbContainer.Host(context.Background())
 	if err != nil {
@@ -47,8 +48,8 @@ func mustStartPostgresContainer() (func(context.Context) error, error) {
 		return dbContainer.Terminate, err
 	}
 
-	host = dbHost
-	port = dbPort.Port()
+	config.Config.DBHost = dbHost
+	config.Config.DBPort = dbPort.Port()
 
 	return dbContainer.Terminate, err
 }

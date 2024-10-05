@@ -1,6 +1,7 @@
 package server
 
 import (
+	"NBAPI/internal/config"
 	"NBAPI/internal/database"
 	"NBAPI/internal/modules/player"
 	"NBAPI/internal/modules/team"
@@ -11,10 +12,21 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httprate"
+	httprateredis "github.com/go-chi/httprate-redis"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
+
+	r.Use(httprate.Limit(
+		100,
+		time.Minute,
+		httprate.WithKeyByIP(),
+		httprateredis.WithRedisLimitCounter(&httprateredis.Config{
+			Host: config.Config.RedisHost, Port: 6379,
+		}),
+	))
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
