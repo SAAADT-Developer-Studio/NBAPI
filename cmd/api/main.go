@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-
 	logrus.Info("Starting server...")
 	server := server.NewServer()
 	logrus.Infof("Server listening on %s\n", server.Addr)

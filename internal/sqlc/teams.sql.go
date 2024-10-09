@@ -7,6 +7,8 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getTeam = `-- name: GetTeam :one
@@ -29,11 +31,18 @@ const getTeamPer100Possesions = `-- name: GetTeamPer100Possesions :many
 select per_100_possesions.id, per_100_possesions.fg, per_100_possesions.fga, per_100_possesions.p3, per_100_possesions.pa3, per_100_possesions.p2, per_100_possesions.pa2, per_100_possesions.ft, per_100_possesions.fta, per_100_possesions.orb, per_100_possesions.drb, per_100_possesions.trb, per_100_possesions.stl, per_100_possesions.blk, per_100_possesions.ast, per_100_possesions.tov, per_100_possesions.pf, per_100_possesions.pts, per_100_possesions.o_rtg, per_100_possesions.d_rtg from team
   inner join team_per_100_possesions on team.abbr = team_per_100_possesions.team_abbr
   inner join per_100_possesions on team_per_100_possesions.per_100_id = per_100_possesions.id
-  where team.abbr = $1
+  where team.abbr = $1 and
+    team_per_100_possesions.season_year between $2 and $3
 `
 
-func (q *Queries) GetTeamPer100Possesions(ctx context.Context, abbr string) ([]Per100Possesion, error) {
-	rows, err := q.db.Query(ctx, getTeamPer100Possesions, abbr)
+type GetTeamPer100PossesionsParams struct {
+	Abbr         string `json:"abbr"`
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+}
+
+func (q *Queries) GetTeamPer100Possesions(ctx context.Context, arg GetTeamPer100PossesionsParams) ([]Per100Possesion, error) {
+	rows, err := q.db.Query(ctx, getTeamPer100Possesions, arg.Abbr, arg.SeasonYear, arg.SeasonYear_2)
 	if err != nil {
 		return nil, err
 	}
@@ -74,21 +83,56 @@ func (q *Queries) GetTeamPer100Possesions(ctx context.Context, abbr string) ([]P
 }
 
 const getTeamPerGame = `-- name: GetTeamPerGame :many
-select per_game.id, per_game.mp, per_game.fg, per_game.fga, per_game.fg_percent, per_game.p3, per_game.pa3, per_game.p_percent3, per_game.p2, per_game.pa2, per_game.p_percent2, per_game.efg_percent, per_game.ft, per_game.fta, per_game.ft_percent, per_game.orb, per_game.drb, per_game.trb, per_game.ast, per_game.stl, per_game.blk, per_game.tov, per_game.pf, per_game.pts from team
+select per_game.id, per_game.mp, per_game.fg, per_game.fga, per_game.fg_percent, per_game.p3, per_game.pa3, per_game.p_percent3, per_game.p2, per_game.pa2, per_game.p_percent2, per_game.efg_percent, per_game.ft, per_game.fta, per_game.ft_percent, per_game.orb, per_game.drb, per_game.trb, per_game.ast, per_game.stl, per_game.blk, per_game.tov, per_game.pf, per_game.pts, team_per_game.season_year from team
   inner join team_per_game on team.abbr = team_per_game.team_abbr
   inner join per_game on team_per_game.per_game_id = per_game.id
-  where team.abbr = $1
+  where team.abbr = $1 and
+    team_per_game.season_year between $2 and $3
 `
 
-func (q *Queries) GetTeamPerGame(ctx context.Context, abbr string) ([]PerGame, error) {
-	rows, err := q.db.Query(ctx, getTeamPerGame, abbr)
+type GetTeamPerGameParams struct {
+	Abbr         string `json:"abbr"`
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+}
+
+type GetTeamPerGameRow struct {
+	ID         int32   `json:"id"`
+	Mp         float32 `json:"mp"`
+	Fg         float32 `json:"fg"`
+	Fga        float32 `json:"fga"`
+	FgPercent  float32 `json:"fg_percent"`
+	P3         int32   `json:"p3"`
+	Pa3        int32   `json:"pa3"`
+	PPercent3  float32 `json:"p_percent3"`
+	P2         int32   `json:"p2"`
+	Pa2        int32   `json:"pa2"`
+	PPercent2  float32 `json:"p_percent2"`
+	EfgPercent float32 `json:"efg_percent"`
+	Ft         float32 `json:"ft"`
+	Fta        float32 `json:"fta"`
+	FtPercent  float32 `json:"ft_percent"`
+	Orb        float32 `json:"orb"`
+	Drb        float32 `json:"drb"`
+	Trb        float32 `json:"trb"`
+	Ast        float32 `json:"ast"`
+	Stl        float32 `json:"stl"`
+	Blk        float32 `json:"blk"`
+	Tov        float32 `json:"tov"`
+	Pf         float32 `json:"pf"`
+	Pts        float32 `json:"pts"`
+	SeasonYear int32   `json:"season_year"`
+}
+
+func (q *Queries) GetTeamPerGame(ctx context.Context, arg GetTeamPerGameParams) ([]GetTeamPerGameRow, error) {
+	rows, err := q.db.Query(ctx, getTeamPerGame, arg.Abbr, arg.SeasonYear, arg.SeasonYear_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []PerGame
+	var items []GetTeamPerGameRow
 	for rows.Next() {
-		var i PerGame
+		var i GetTeamPerGameRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Mp,
@@ -114,6 +158,7 @@ func (q *Queries) GetTeamPerGame(ctx context.Context, abbr string) ([]PerGame, e
 			&i.Tov,
 			&i.Pf,
 			&i.Pts,
+			&i.SeasonYear,
 		); err != nil {
 			return nil, err
 		}
@@ -126,21 +171,53 @@ func (q *Queries) GetTeamPerGame(ctx context.Context, abbr string) ([]PerGame, e
 }
 
 const getTeamTotals = `-- name: GetTeamTotals :many
-select totals.id, totals.gp, totals.gs, totals.mp, totals.fg, totals.fga, totals.p3, totals.pa3, totals.p2, totals.pa2, totals.ft, totals.fta, totals.orb, totals.drb, totals.trb, totals.stl, totals.blk, totals.ast, totals.tov, totals.pf, totals.pts from team
+select totals.id, totals.gp, totals.gs, totals.mp, totals.fg, totals.fga, totals.p3, totals.pa3, totals.p2, totals.pa2, totals.ft, totals.fta, totals.orb, totals.drb, totals.trb, totals.stl, totals.blk, totals.ast, totals.tov, totals.pf, totals.pts, team_totals.season_year from team
   inner join team_totals on team.abbr = team_totals.team_abbr
   inner join totals on team_totals.total_id = totals.id
-  where team.abbr = $1
+  where team.abbr = $1 and
+    team_totals.season_year between $2 and $3
 `
 
-func (q *Queries) GetTeamTotals(ctx context.Context, abbr string) ([]Total, error) {
-	rows, err := q.db.Query(ctx, getTeamTotals, abbr)
+type GetTeamTotalsParams struct {
+	Abbr         string `json:"abbr"`
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+}
+
+type GetTeamTotalsRow struct {
+	ID         int32       `json:"id"`
+	Gp         int32       `json:"gp"`
+	Gs         pgtype.Int4 `json:"gs"`
+	Mp         int32       `json:"mp"`
+	Fg         int32       `json:"fg"`
+	Fga        int32       `json:"fga"`
+	P3         int32       `json:"p3"`
+	Pa3        int32       `json:"pa3"`
+	P2         int32       `json:"p2"`
+	Pa2        int32       `json:"pa2"`
+	Ft         int32       `json:"ft"`
+	Fta        int32       `json:"fta"`
+	Orb        int32       `json:"orb"`
+	Drb        int32       `json:"drb"`
+	Trb        int32       `json:"trb"`
+	Stl        int32       `json:"stl"`
+	Blk        int32       `json:"blk"`
+	Ast        int32       `json:"ast"`
+	Tov        int32       `json:"tov"`
+	Pf         int32       `json:"pf"`
+	Pts        int32       `json:"pts"`
+	SeasonYear int32       `json:"season_year"`
+}
+
+func (q *Queries) GetTeamTotals(ctx context.Context, arg GetTeamTotalsParams) ([]GetTeamTotalsRow, error) {
+	rows, err := q.db.Query(ctx, getTeamTotals, arg.Abbr, arg.SeasonYear, arg.SeasonYear_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Total
+	var items []GetTeamTotalsRow
 	for rows.Next() {
-		var i Total
+		var i GetTeamTotalsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Gp,
@@ -163,6 +240,7 @@ func (q *Queries) GetTeamTotals(ctx context.Context, abbr string) ([]Total, erro
 			&i.Tov,
 			&i.Pf,
 			&i.Pts,
+			&i.SeasonYear,
 		); err != nil {
 			return nil, err
 		}
