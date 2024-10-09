@@ -3,13 +3,16 @@ package main
 import (
 	"NBAPI/internal/server"
 	"fmt"
+
+	_ "github.com/joho/godotenv/autoload"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
 
-	fmt.Println("Starting server...")
+	logrus.Info("Starting server...")
 	server := server.NewServer()
-	fmt.Printf("Server listening on %s\n", server.Addr)
+	logrus.Infof("Server listening on %s\n", server.Addr)
 	err := server.ListenAndServe()
 	if err != nil {
 		panic(fmt.Sprintf("cannot start server: %s", err))
