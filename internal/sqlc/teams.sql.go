@@ -33,6 +33,7 @@ select per_100_possesions.id, per_100_possesions.fg, per_100_possesions.fga, per
   inner join per_100_possesions on team_per_100_possesions.per_100_id = per_100_possesions.id
   where team.abbr = $1 and
     team_per_100_possesions.season_year between $2 and $3
+  order by team_per_100_possesions.season_year desc
 `
 
 type GetTeamPer100PossesionsParams struct {
@@ -88,6 +89,7 @@ select per_game.id, per_game.mp, per_game.fg, per_game.fga, per_game.fg_percent,
   inner join per_game on team_per_game.per_game_id = per_game.id
   where team.abbr = $1 and
     team_per_game.season_year between $2 and $3
+  order by team_per_game.season_year desc
 `
 
 type GetTeamPerGameParams struct {
@@ -176,6 +178,7 @@ select totals.id, totals.gp, totals.gs, totals.mp, totals.fg, totals.fga, totals
   inner join totals on team_totals.total_id = totals.id
   where team.abbr = $1 and
     team_totals.season_year between $2 and $3
+  order by team_totals.season_year desc
 `
 
 type GetTeamTotalsParams struct {
