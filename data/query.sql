@@ -383,6 +383,15 @@ insert into
     )
 values ($1, $2, $3, $4);
 
+-- name: GetPlayerAwards :many
+SELECT * FROM player_awards where player_id = $1;
+
+-- name: GetAwardWinners :many
+SELECT * FROM player_awards where winner = true AND season_year BETWEEN $1 and $2 ORDER BY season_year DESC;
+
+-- name: GetSpecificAwardWinners :many
+SELECT * FROM player_awards where winner = true AND award = $3 AND season_year BETWEEN $1 and $2;
+
 -- name: CreatePer36 :exec
 INSERT INTO
     player_per_36 (

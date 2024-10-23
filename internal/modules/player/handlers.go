@@ -275,3 +275,55 @@ func PlayerSpecificStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	render.JSON(w, r, data)
 }
+
+func PlayerAwardHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	_playerId := chi.URLParam(r, "playerId")
+	playerId, playerIdErr := strconv.Atoi(_playerId)
+
+	if playerIdErr != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Your playerId is not a number"))
+		return
+	}
+
+	playerAward, err := database.Queries.GetPlayerAwards(ctx, int32(playerId))
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error doing your query"))
+		return
+	}
+
+	render.JSON(w, r, playerAward)
+}
+
+func PlayerAwardWinnerHandler(w http.ResponseWriter, r *http.Request) {
+	seasonFrom := r.URL.Query().Get("seasonFrom")
+	seasonTo := r.URL.Query().Get("seasonTo")
+
+	var seasonFromInt int
+	var seasonToInt int
+
+	if len(seasonFrom) == 0 {
+		seasonFromInt = 1800
+	} else {
+		seasonFromInt, _ = strconv.Atoi(seasonFrom)
+	}
+
+	if len(seasonTo) == 0 {
+		seasonToInt = time.Now().Year()
+	} else {
+		seasonToInt, _ = strconv.Atoi(seasonTo)
+	}
+
+	awards, err := database.Queries.GetAwardWinners(r.Context(), sqlc.GetAwardWinnersParams{int32(seasonFromInt), int32(seasonToInt)})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error doing your query"))
+		return
+	}
+
+	render.JSON(w, r, awards)
+
+}
