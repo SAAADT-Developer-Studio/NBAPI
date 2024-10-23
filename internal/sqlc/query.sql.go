@@ -1176,6 +1176,43 @@ func (q *Queries) CreateTotals(ctx context.Context, arg CreateTotalsParams) erro
 	return err
 }
 
+const getAwardWinners = `-- name: GetAwardWinners :many
+SELECT player_id, season_year, award, pts_won, pts_max, share, winner FROM player_awards where winner = true AND season_year BETWEEN $1 and $2 ORDER BY season_year DESC
+`
+
+type GetAwardWinnersParams struct {
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+func (q *Queries) GetAwardWinners(ctx context.Context, arg GetAwardWinnersParams) ([]PlayerAward, error) {
+	rows, err := q.db.Query(ctx, getAwardWinners, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PlayerAward
+	for rows.Next() {
+		var i PlayerAward
+		if err := rows.Scan(
+			&i.PlayerID,
+			&i.SeasonYear,
+			&i.Award,
+			&i.PtsWon,
+			&i.PtsMax,
+			&i.Share,
+			&i.Winner,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPlayerAdvanced = `-- name: GetPlayerAdvanced :many
 select advanced.id, advanced.per, advanced.ts_percent, advanced.p_ar3, advanced.f_tr, advanced.orb_percent, advanced.drb_percent, advanced.trb_percent, advanced.ast_percent, advanced.stl_percent, advanced.blk_percent, advanced.tov_percent, advanced.usg_percent, advanced.ows, advanced.dws, advanced.ws, advanced.ws48, advanced.obpm, advanced.dbpm, advanced.bpm, advanced.vorp from player
   inner join player_advanced on player.id = player_advanced.player_id
@@ -1221,6 +1258,38 @@ func (q *Queries) GetPlayerAdvanced(ctx context.Context, arg GetPlayerAdvancedPa
 			&i.Dbpm,
 			&i.Bpm,
 			&i.Vorp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerAwards = `-- name: GetPlayerAwards :many
+SELECT player_id, season_year, award, pts_won, pts_max, share, winner FROM player_awards where player_id = $1
+`
+
+func (q *Queries) GetPlayerAwards(ctx context.Context, playerID int32) ([]PlayerAward, error) {
+	rows, err := q.db.Query(ctx, getPlayerAwards, playerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PlayerAward
+	for rows.Next() {
+		var i PlayerAward
+		if err := rows.Scan(
+			&i.PlayerID,
+			&i.SeasonYear,
+			&i.Award,
+			&i.PtsWon,
+			&i.PtsMax,
+			&i.Share,
+			&i.Winner,
 		); err != nil {
 			return nil, err
 		}
@@ -1566,6 +1635,44 @@ func (q *Queries) GetPlayers(ctx context.Context) ([]Player, error) {
 	for rows.Next() {
 		var i Player
 		if err := rows.Scan(&i.ID, &i.Fullname); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSpecificAwardWinners = `-- name: GetSpecificAwardWinners :many
+SELECT player_id, season_year, award, pts_won, pts_max, share, winner FROM player_awards where winner = true AND award = $3 AND season_year BETWEEN $1 and $2
+`
+
+type GetSpecificAwardWinnersParams struct {
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+	Award        string `json:"award"`
+}
+
+func (q *Queries) GetSpecificAwardWinners(ctx context.Context, arg GetSpecificAwardWinnersParams) ([]PlayerAward, error) {
+	rows, err := q.db.Query(ctx, getSpecificAwardWinners, arg.SeasonYear, arg.SeasonYear_2, arg.Award)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PlayerAward
+	for rows.Next() {
+		var i PlayerAward
+		if err := rows.Scan(
+			&i.PlayerID,
+			&i.SeasonYear,
+			&i.Award,
+			&i.PtsWon,
+			&i.PtsMax,
+			&i.Share,
+			&i.Winner,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
