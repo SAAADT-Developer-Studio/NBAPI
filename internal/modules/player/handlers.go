@@ -14,10 +14,38 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Ranges struct {
-	Key    string
-	FromTo string
-	Value  string
+type PlayersResponse struct {
+	Players  []sqlc.Player `json:"players"`
+	NextPage *int32        `json:"next_page"`
+}
+
+func PlayersHandler(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("search")
+	pageSize := int32(r.Context().Value(middleware.PageSizeKey).(int))
+
+	pageCursorQuery := r.Context().Value(middleware.PageCursorKey).(string)
+	if len(pageCursorQuery) == 0 {
+		pageCursorQuery = "0" // not the best but it works so shut up
+	}
+	pageCursor, err := strconv.Atoi(pageCursorQuery)
+	if err != nil {
+		http.Error(w, "Invalid page cursor", http.StatusBadRequest)
+		return
+	}
+
+	players, err := database.Queries.GetPlayers(r.Context(), sqlc.GetPlayersParams{Search: search, PageSize: pageSize, Cursor: int32(pageCursor)})
+	if err != nil {
+		log.Error(err)
+		http.Error(w, "Error fetching players", http.StatusInternalServerError)
+		return
+	}
+
+	var nextPage *int32
+	if len(players) > 0 {
+		nextPage = &(players[len(players)-1].ID)
+		players = players[:len(players)-1]
+	}
+	render.JSON(w, r, PlayersResponse{Players: players, NextPage: nextPage})
 }
 
 type PlayerResponse struct {
@@ -28,26 +56,6 @@ type PlayerResponse struct {
 	Advanced []sqlc.Advanced        `json:"advanced"`
 	Per36    []sqlc.PlayerPer36     `json:"per36"`
 	Shooting []sqlc.PlayerShooting  `json:"shooting"`
-}
-
-func PlayersHandler(w http.ResponseWriter, r *http.Request) {
-	search := r.URL.Query().Get("search")
-	var players []sqlc.Player
-	var err error
-
-	if len(search) == 0 {
-		players, err = database.Queries.GetPlayers(r.Context())
-	} else {
-		players, err = database.Queries.GetPlayerBySearch(r.Context(), search)
-	}
-	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching players"))
-		return
-	}
-	fmt.Println("players", players)
-	render.JSON(w, r, players)
 }
 
 func PlayerHandler(w http.ResponseWriter, r *http.Request) {

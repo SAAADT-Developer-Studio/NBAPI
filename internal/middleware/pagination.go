@@ -9,8 +9,8 @@ import (
 type PaginationSearchParam string
 
 const (
-	PageCursor  PaginationSearchParam = "pageCursor"
-	PageSizeKey PaginationSearchParam = "pageSize"
+	PageCursorKey PaginationSearchParam = "pageCursor"
+	PageSizeKey   PaginationSearchParam = "pageSize"
 )
 
 const DEFAULT_PAGE_SIZE = 10
@@ -26,7 +26,7 @@ func getPageSize(pageSizeQuery string) (int, error) {
 
 func Pagination(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		pageCursor := r.URL.Query().Get(string(PageCursor))
+		pageCursor := r.URL.Query().Get(string(PageCursorKey))
 		pageSizeQuery := r.URL.Query().Get(string(PageSizeKey))
 		pageSize, err := getPageSize(pageSizeQuery)
 
@@ -38,7 +38,7 @@ func Pagination(next http.Handler) http.Handler {
 		pageSize = max(MIN_PAGE_SIZE, pageSize)
 		pageSize = min(MAX_PAGE_SIZE, pageSize)
 
-		ctx := context.WithValue(r.Context(), PageCursor, pageCursor)
+		ctx := context.WithValue(r.Context(), PageCursorKey, pageCursor)
 		ctx = context.WithValue(ctx, PageSizeKey, pageSize)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

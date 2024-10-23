@@ -8,6 +8,7 @@ import (
 
 func Router(router chi.Router) {
 	router.Use(middleware.SeasonYearMiddleware)
+	router.Use(middleware.Pagination)
 	router.Get("/", PlayersHandler)
 	router.Get("/all-stars", AllStarHandler)
 	router.Get("/awards", PlayerAwardWinnerHandler)

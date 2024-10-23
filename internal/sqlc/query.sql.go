@@ -1490,35 +1490,6 @@ func (q *Queries) GetPlayerById(ctx context.Context, id int32) (Player, error) {
 	return i, err
 }
 
-const getPlayerBySearch = `-- name: GetPlayerBySearch :many
-select
-    id, fullname
-from
-    player
-where
-    lower(fullName) like '%' || lower($1) || '%'
-`
-
-func (q *Queries) GetPlayerBySearch(ctx context.Context, lower string) ([]Player, error) {
-	rows, err := q.db.Query(ctx, getPlayerBySearch, lower)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Player
-	for rows.Next() {
-		var i Player
-		if err := rows.Scan(&i.ID, &i.Fullname); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getPlayerPer100 = `-- name: GetPlayerPer100 :many
 select per_100_possesions.id, per_100_possesions.fg, per_100_possesions.fga, per_100_possesions.p3, per_100_possesions.pa3, per_100_possesions.p2, per_100_possesions.pa2, per_100_possesions.ft, per_100_possesions.fta, per_100_possesions.orb, per_100_possesions.drb, per_100_possesions.trb, per_100_possesions.stl, per_100_possesions.blk, per_100_possesions.ast, per_100_possesions.tov, per_100_possesions.pf, per_100_possesions.pts, per_100_possesions.o_rtg, per_100_possesions.d_rtg from player
   inner join player_per_100_possesions on player.id = player_per_100_possesions.player_id
@@ -1744,7 +1715,7 @@ func (q *Queries) GetPlayerShooting(ctx context.Context, arg GetPlayerShootingPa
 }
 
 const getPlayerTotals = `-- name: GetPlayerTotals :many
-select totals.id, totals.gp, totals.gs, totals.mp, totals.fg, totals.fga, totals.p3, totals.pa3, totals.p2, totals.pa2, totals.ft, totals.fta, totals.orb, totals.drb, totals.trb, totals.stl, totals.blk, totals.ast, totals.tov, totals.pf, totals.pts from player 
+select totals.id, totals.gp, totals.gs, totals.mp, totals.fg, totals.fga, totals.p3, totals.pa3, totals.p2, totals.pa2, totals.ft, totals.fta, totals.orb, totals.drb, totals.trb, totals.stl, totals.blk, totals.ast, totals.tov, totals.pf, totals.pts from player
 inner join player_totals on player.id = player_totals.player_id
 inner join totals on totals.id = player_totals.total_id
 where player.id = $1
@@ -1800,11 +1771,25 @@ func (q *Queries) GetPlayerTotals(ctx context.Context, arg GetPlayerTotalsParams
 }
 
 const getPlayers = `-- name: GetPlayers :many
-select id, fullname from player
+select
+    id, fullname
+from
+    player
+where
+    lower(fullName) like '%' || lower($1) || '%' and
+    id >= $2
+    order by id
+    limit $3 + 1
 `
 
-func (q *Queries) GetPlayers(ctx context.Context) ([]Player, error) {
-	rows, err := q.db.Query(ctx, getPlayers)
+type GetPlayersParams struct {
+	Search   string      `json:"search"`
+	Cursor   int32       `json:"cursor"`
+	PageSize interface{} `json:"page_size"`
+}
+
+func (q *Queries) GetPlayers(ctx context.Context, arg GetPlayersParams) ([]Player, error) {
+	rows, err := q.db.Query(ctx, getPlayers, arg.Search, arg.Cursor, arg.PageSize)
 	if err != nil {
 		return nil, err
 	}
