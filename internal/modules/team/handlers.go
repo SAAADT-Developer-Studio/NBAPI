@@ -20,7 +20,7 @@ type TeamsResponse struct {
 func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	search := r.URL.Query().Get("search")
-	pageCursor := ctx.Value(middleware.PageCursor).(string)
+	pageCursor := ctx.Value(middleware.PageCursorKey).(string)
 	pageSize := ctx.Value(middleware.PageSizeKey).(int)
 	teams, err := database.Queries.GetTeams(ctx, sqlc.GetTeamsParams{Search: search, PageSize: int32(pageSize), Cursor: pageCursor})
 	logrus.Info("search", search, len(search))

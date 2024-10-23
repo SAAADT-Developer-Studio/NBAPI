@@ -1,11 +1,19 @@
 -- name: GetPlayers :many
-select * from player;
+select
+    *
+from
+    player
+where
+    lower(fullName) like '%' || lower(sqlc.arg(search)) || '%' and
+    id >= sqlc.arg(cursor)
+    order by id
+    limit sqlc.arg(page_size) + 1;
 
 -- name: GetPlayerById :one
 select * from player where id = $1;
 
 -- name: GetPlayerTotals :many
-select totals.* from player 
+select totals.* from player
 inner join player_totals on player.id = player_totals.player_id
 inner join totals on totals.id = player_totals.total_id
 where player.id = $1
@@ -42,15 +50,8 @@ select player_per_36.* from player
 select player_shooting.* from player
   inner join player_shooting on player_shooting.player_id = player.id
   where player.id = $1
-  and player_shooting.season_year between $2 and $3;    
+  and player_shooting.season_year between $2 and $3;
 
--- name: GetPlayerBySearch :many
-select
-    *
-from
-    player
-where
-    lower(fullName) like '%' || lower($1) || '%'; 
 
 -- name: CreatePlayer :exec
 insert into player (id, fullName) values ($1, $2);
