@@ -1176,8 +1176,6 @@ func (q *Queries) CreateTotals(ctx context.Context, arg CreateTotalsParams) erro
 	return err
 }
 
-<<<<<<< Updated upstream
-=======
 const getAllTeams = `-- name: GetAllTeams :many
 SELECT player_id, season_year, type, team_number, id, fullname FROM all_teams JOIN player on player.id = all_teams.player_id and season_year BETWEEN $1 and $2
 `
@@ -1306,7 +1304,6 @@ func (q *Queries) GetAwardWinners(ctx context.Context, arg GetAwardWinnersParams
 	return items, nil
 }
 
->>>>>>> Stashed changes
 const getPlayerAdvanced = `-- name: GetPlayerAdvanced :many
 select advanced.id, advanced.per, advanced.ts_percent, advanced.p_ar3, advanced.f_tr, advanced.orb_percent, advanced.drb_percent, advanced.trb_percent, advanced.ast_percent, advanced.stl_percent, advanced.blk_percent, advanced.tov_percent, advanced.usg_percent, advanced.ows, advanced.dws, advanced.ws, advanced.ws48, advanced.obpm, advanced.dbpm, advanced.bpm, advanced.vorp from player
   inner join player_advanced on player.id = player_advanced.player_id
@@ -1363,8 +1360,6 @@ func (q *Queries) GetPlayerAdvanced(ctx context.Context, arg GetPlayerAdvancedPa
 	return items, nil
 }
 
-<<<<<<< Updated upstream
-=======
 const getPlayerAllTeams = `-- name: GetPlayerAllTeams :many
 SELECT player_id, season_year, type, team_number, id, fullname FROM all_teams JOIN player on player.id = all_teams.player_id where player_id = $1 and season_year BETWEEN $2 and $3
 `
@@ -1449,7 +1444,6 @@ func (q *Queries) GetPlayerAwards(ctx context.Context, arg GetPlayerAwardsParams
 	return items, nil
 }
 
->>>>>>> Stashed changes
 const getPlayerById = `-- name: GetPlayerById :one
 select id, fullname from player where id = $1
 `

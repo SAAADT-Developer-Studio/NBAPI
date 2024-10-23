@@ -275,8 +275,6 @@ func PlayerSpecificStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	render.JSON(w, r, data)
 }
-<<<<<<< Updated upstream
-=======
 
 func PlayerAwardHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -452,4 +450,3 @@ func AllTeamTypeHandler(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, allTeams)
 
 }
->>>>>>> Stashed changes

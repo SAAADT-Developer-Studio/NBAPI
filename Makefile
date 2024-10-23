@@ -70,6 +70,9 @@ watch:
             fi; \
         fi
 
+watch-windows:
+	@air -c ".air.windows.toml"
+
 sqlc:
 	@sqlc generate
 
