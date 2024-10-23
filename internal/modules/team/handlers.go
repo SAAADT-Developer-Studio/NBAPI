@@ -2,6 +2,7 @@ package team
 
 import (
 	"NBAPI/internal/database"
+	"NBAPI/internal/middleware"
 	"NBAPI/internal/sqlc"
 	"fmt"
 	"net/http"
@@ -11,11 +12,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type TeamsResponse struct {
+	Teams    []sqlc.Team `json:"teams"`
+	NextPage *string     `json:"next_page"`
+}
+
 func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	search := r.URL.Query().Get("search")
-	teams, err := database.Queries.GetTeams(ctx, search)
-
+	pageCursor := ctx.Value(middleware.PageCursor).(string)
+	pageSize := ctx.Value(middleware.PageSizeKey).(int)
+	teams, err := database.Queries.GetTeams(ctx, sqlc.GetTeamsParams{Search: search, PageSize: int32(pageSize), Cursor: pageCursor})
+	logrus.Info("search", search, len(search))
 	if err != nil {
 		logrus.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -25,7 +33,16 @@ func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 	if teams == nil {
 		teams = []sqlc.Team{}
 	}
-	render.JSON(w, r, teams)
+	var nextPage *string
+	if len(teams) > pageSize {
+		teams = teams[:pageSize+1]
+		nextPage = &teams[len(teams)-1].Abbr
+	}
+
+	render.JSON(w, r, TeamsResponse{
+		Teams:    teams[:len(teams)-1],
+		NextPage: nextPage,
+	})
 }
 
 type TeamResponse struct {

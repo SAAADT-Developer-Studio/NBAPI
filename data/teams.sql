@@ -4,7 +4,10 @@ select
 from
   team
 where
-  lower(fullname) like '%' || lower($1) || '%';
+  lower(fullname) like '%' || lower(sqlc.arg(search)) || '%' and
+  abbr >= sqlc.arg(cursor)
+  order by abbr
+  limit sqlc.arg(page_size) + 1;
 
 -- name: GetTeam :one
 select

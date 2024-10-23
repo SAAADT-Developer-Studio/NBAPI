@@ -1,6 +1,7 @@
 package team
 
 import (
+	"NBAPI/internal/middleware"
 	"context"
 	"net/http"
 	"strconv"
@@ -49,6 +50,7 @@ func SeasonYearMiddleware(next http.Handler) http.Handler {
 }
 
 func Router(router chi.Router) {
+	router.Use(middleware.Pagination)
 	router.Get("/", TeamsHandler)
 	router.Route("/{teamId}", func(r chi.Router) {
 		r.Use(SeasonYearMiddleware)
