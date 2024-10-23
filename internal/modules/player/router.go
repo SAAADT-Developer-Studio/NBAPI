@@ -6,7 +6,7 @@ import (
 
 func Router(router chi.Router) {
 	router.Get("/", PlayersHandler)
-
+	router.Get("/all-stars", AllStarHandler)
 	router.Get("/awards", PlayerAwardWinnerHandler)
 	router.Route("/all-teams", func(r chi.Router) {
 		r.Get("/", AllTeamHandler)

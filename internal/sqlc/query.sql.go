@@ -1176,6 +1176,41 @@ func (q *Queries) CreateTotals(ctx context.Context, arg CreateTotalsParams) erro
 	return err
 }
 
+const getAllStars = `-- name: GetAllStars :many
+select playerfullname, season_year, teamname, replaced from all_stars where lower(playerFullName) like '%' || lower($1) || '%'  and season_year between $2 and $3
+`
+
+type GetAllStarsParams struct {
+	Lower        string `json:"lower"`
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+}
+
+func (q *Queries) GetAllStars(ctx context.Context, arg GetAllStarsParams) ([]AllStar, error) {
+	rows, err := q.db.Query(ctx, getAllStars, arg.Lower, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []AllStar
+	for rows.Next() {
+		var i AllStar
+		if err := rows.Scan(
+			&i.Playerfullname,
+			&i.SeasonYear,
+			&i.Teamname,
+			&i.Replaced,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllTeams = `-- name: GetAllTeams :many
 SELECT player_id, season_year, type, team_number, id, fullname FROM all_teams JOIN player on player.id = all_teams.player_id and season_year BETWEEN $1 and $2
 `
@@ -1266,7 +1301,6 @@ func (q *Queries) GetAllTeamsType(ctx context.Context, arg GetAllTeamsTypeParams
 	}
 	return items, nil
 }
-
 
 const getAwardWinners = `-- name: GetAwardWinners :many
 SELECT player_id, season_year, award, pts_won, pts_max, share, winner FROM player_awards where winner = true AND season_year BETWEEN $1 and $2 ORDER BY season_year DESC
@@ -1419,7 +1453,6 @@ type GetPlayerAwardsParams struct {
 
 func (q *Queries) GetPlayerAwards(ctx context.Context, arg GetPlayerAwardsParams) ([]PlayerAward, error) {
 	rows, err := q.db.Query(ctx, getPlayerAwards, arg.PlayerID, arg.SeasonYear, arg.SeasonYear_2)
-
 	if err != nil {
 		return nil, err
 	}

@@ -396,9 +396,6 @@ SELECT * FROM all_teams JOIN player on player.id = all_teams.player_id and seaso
 -- name: GetAllTeamsType :many
 SELECT * FROM all_teams JOIN player on player.id = all_teams.player_id where "type" = $1 and season_year BETWEEN $2 and $3;
 
--- name: GetPlayerAwards :many
-SELECT * FROM player_awards where player_id = $1;
-
 -- name: GetAwardWinners :many
 SELECT * FROM player_awards where winner = true AND season_year BETWEEN $1 and $2 ORDER BY season_year DESC;
 
@@ -524,6 +521,9 @@ insert into player_team (
 
 
 ) values ( $1, $2, $3, $4, $5, $6);
+
+-- name: GetAllStars :many
+select * from all_stars where lower(playerFullName) like '%' || lower($1) || '%'  and season_year between $2 and $3;
 
 -- name: CreatePlayerAwards :exec
 insert into
