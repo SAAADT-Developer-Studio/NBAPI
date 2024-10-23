@@ -383,6 +383,19 @@ insert into
     )
 values ($1, $2, $3, $4);
 
+
+-- name: GetPlayerAwards :many
+SELECT * FROM player_awards where player_id = $1 and season_year BETWEEN $2 and $3;
+
+-- name: GetPlayerAllTeams :many
+SELECT * FROM all_teams JOIN player on player.id = all_teams.player_id where player_id = $1 and season_year BETWEEN $2 and $3;
+
+-- name: GetAllTeams :many
+SELECT * FROM all_teams JOIN player on player.id = all_teams.player_id and season_year BETWEEN $1 and $2;
+
+-- name: GetAllTeamsType :many
+SELECT * FROM all_teams JOIN player on player.id = all_teams.player_id where "type" = $1 and season_year BETWEEN $2 and $3;
+
 -- name: GetPlayerAwards :many
 SELECT * FROM player_awards where player_id = $1;
 
