@@ -261,11 +261,20 @@ select
 from
   team
 where
-  lower(fullname) like '%' || lower($1) || '%'
+  lower(fullname) like '%' || lower($1) || '%' and
+  abbr >= $2
+  order by abbr
+  limit $3 + 1
 `
 
-func (q *Queries) GetTeams(ctx context.Context, lower string) ([]Team, error) {
-	rows, err := q.db.Query(ctx, getTeams, lower)
+type GetTeamsParams struct {
+	Search   string      `json:"search"`
+	Cursor   string      `json:"cursor"`
+	PageSize interface{} `json:"page_size"`
+}
+
+func (q *Queries) GetTeams(ctx context.Context, arg GetTeamsParams) ([]Team, error) {
+	rows, err := q.db.Query(ctx, getTeams, arg.Search, arg.Cursor, arg.PageSize)
 	if err != nil {
 		return nil, err
 	}
