@@ -11,7 +11,7 @@ func Router(router chi.Router) {
 
 	router.Route("/{playerId}", func(r chi.Router) {
 		r.Get("/", PlayerHandler)
-		r.Get("/awardVotes", PlayerAwardHandler)
+		r.Get("/award-votes", PlayerAwardHandler)
 		r.Get("/{stat}", PlayerSpecificStatsHandler)
 	})
 }
