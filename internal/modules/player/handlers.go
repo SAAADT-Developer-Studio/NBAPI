@@ -275,3 +275,181 @@ func PlayerSpecificStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	render.JSON(w, r, data)
 }
+<<<<<<< Updated upstream
+=======
+
+func PlayerAwardHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	_playerId := chi.URLParam(r, "playerId")
+	playerId, playerIdErr := strconv.Atoi(_playerId)
+
+	if playerIdErr != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Your playerId is not a number"))
+		return
+	}
+
+	playerAward, err := database.Queries.GetPlayerAwards(ctx, sqlc.GetPlayerAwardsParams{PlayerID: int32(playerId)})
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error doing your query"))
+		return
+	}
+
+	render.JSON(w, r, playerAward)
+}
+
+func PlayerAwardWinnerHandler(w http.ResponseWriter, r *http.Request) {
+	seasonFrom := r.URL.Query().Get("seasonFrom")
+	seasonTo := r.URL.Query().Get("seasonTo")
+
+	var seasonFromInt int
+	var seasonToInt int
+
+	if len(seasonFrom) == 0 {
+		seasonFromInt = 1800
+	} else {
+		seasonFromInt, _ = strconv.Atoi(seasonFrom)
+	}
+
+	if len(seasonTo) == 0 {
+		seasonToInt = time.Now().Year()
+	} else {
+		seasonToInt, _ = strconv.Atoi(seasonTo)
+	}
+
+	awards, err := database.Queries.GetAwardWinners(r.Context(), sqlc.GetAwardWinnersParams{SeasonYear: int32(seasonFromInt), SeasonYear_2: int32(seasonToInt)})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error doing your query"))
+		return
+	}
+
+	render.JSON(w, r, awards)
+
+}
+
+func AllTeamPlayerHandler(w http.ResponseWriter, r *http.Request) {
+	_playerId := chi.URLParam(r, "playerId")
+	playerId, playerIdErr := strconv.Atoi(_playerId)
+
+	if playerIdErr != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Your playerId is not a number"))
+		return
+	}
+
+	seasonFrom := r.URL.Query().Get("seasonFrom")
+	seasonTo := r.URL.Query().Get("seasonTo")
+
+	var seasonFromInt int
+	var seasonToInt int
+
+	if len(seasonFrom) == 0 {
+		seasonFromInt = 1800
+	} else {
+		seasonFromInt, _ = strconv.Atoi(seasonFrom)
+	}
+
+	if len(seasonTo) == 0 {
+		seasonToInt = time.Now().Year()
+	} else {
+		seasonToInt, _ = strconv.Atoi(seasonTo)
+	}
+
+	allTeamPlayer, err := database.Queries.GetPlayerAllTeams(r.Context(), sqlc.GetPlayerAllTeamsParams{PlayerID: int32(playerId), SeasonYear: int32(seasonFromInt), SeasonYear_2: int32(seasonToInt)})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error doing your query"))
+		return
+	}
+
+	render.JSON(w, r, allTeamPlayer)
+
+}
+
+func AllTeamHandler(w http.ResponseWriter, r *http.Request) {
+	seasonFrom := r.URL.Query().Get("seasonFrom")
+	seasonTo := r.URL.Query().Get("seasonTo")
+
+	var seasonFromInt int
+	var seasonToInt int
+
+	if len(seasonFrom) == 0 {
+		seasonFromInt = 1800
+	} else {
+		seasonFromInt, _ = strconv.Atoi(seasonFrom)
+	}
+
+	if len(seasonTo) == 0 {
+		seasonToInt = time.Now().Year()
+	} else {
+		seasonToInt, _ = strconv.Atoi(seasonTo)
+	}
+
+	allTeams, err := database.Queries.GetAllTeams(r.Context(), sqlc.GetAllTeamsParams{SeasonYear: int32(seasonFromInt), SeasonYear_2: int32(seasonToInt)})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error doing your query"))
+		return
+	}
+
+	render.JSON(w, r, allTeams)
+
+}
+
+func includes(arr []string, element string) bool {
+	for _, item := range arr {
+		if item == element {
+			return true
+		}
+	}
+	return false
+}
+
+func AllTeamTypeHandler(w http.ResponseWriter, r *http.Request) {
+	seasonFrom := r.URL.Query().Get("seasonFrom")
+	seasonTo := r.URL.Query().Get("seasonTo")
+	awardType := chi.URLParam(r, "awardType")
+
+	allowedAwardTypes :=
+		[]string{
+			"All-Rookie",
+			"All-BAA",
+			"All-Defense",
+			"All-NBA",
+			"All-ABA"}
+
+	if !includes(allowedAwardTypes, awardType) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("The only allowed award types are: All-Rookie, All-BAA, All-Defense, All-NBA, All-ABA"))
+		return
+	}
+
+	var seasonFromInt int
+	var seasonToInt int
+
+	if len(seasonFrom) == 0 {
+		seasonFromInt = 1800
+	} else {
+		seasonFromInt, _ = strconv.Atoi(seasonFrom)
+	}
+
+	if len(seasonTo) == 0 {
+		seasonToInt = time.Now().Year()
+	} else {
+		seasonToInt, _ = strconv.Atoi(seasonTo)
+	}
+
+	allTeams, err := database.Queries.GetAllTeamsType(r.Context(), sqlc.GetAllTeamsTypeParams{Type: awardType, SeasonYear: int32(seasonFromInt), SeasonYear_2: int32(seasonToInt)})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error doing your query"))
+		return
+	}
+
+	render.JSON(w, r, allTeams)
+
+}
+>>>>>>> Stashed changes
