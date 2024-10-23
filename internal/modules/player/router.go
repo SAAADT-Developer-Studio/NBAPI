@@ -1,10 +1,13 @@
 package player
 
 import (
+	"NBAPI/internal/middleware"
+
 	"github.com/go-chi/chi/v5"
 )
 
 func Router(router chi.Router) {
+	router.Use(middleware.SeasonYearMiddleware)
 	router.Get("/", PlayersHandler)
 	router.Get("/all-stars", AllStarHandler)
 	router.Get("/awards", PlayerAwardWinnerHandler)

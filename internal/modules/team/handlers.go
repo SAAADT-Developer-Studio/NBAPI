@@ -55,8 +55,8 @@ type TeamResponse struct {
 func TeamHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	abbr := chi.URLParam(r, "teamId")
-	seasonFrom := int32(ctx.Value(seasonFromKey).(int))
-	seasonTo := int32(ctx.Value(seasonToKey).(int))
+	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
 	team, teamErr := database.Queries.GetTeam(ctx, abbr)
 	totalsRows, totalsErr := database.Queries.GetTeamTotals(ctx,
 		sqlc.GetTeamTotalsParams{Abbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -93,8 +93,8 @@ func TeamHandler(w http.ResponseWriter, r *http.Request) {
 func TeamPerGameStatsHandler(w http.ResponseWriter, r *http.Request) {
 	abbr := chi.URLParam(r, "teamId")
 	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(seasonFromKey).(int))
-	seasonTo := int32(ctx.Value(seasonToKey).(int))
+	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
 
 	perGame, err := database.Queries.GetTeamPerGame(ctx,
 		sqlc.GetTeamPerGameParams{Abbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -113,8 +113,8 @@ func TeamPerGameStatsHandler(w http.ResponseWriter, r *http.Request) {
 func TeamPer100PossStatsHandler(w http.ResponseWriter, r *http.Request) {
 	abbr := chi.URLParam(r, "teamId")
 	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(seasonFromKey).(int))
-	seasonTo := int32(ctx.Value(seasonToKey).(int))
+	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
 
 	per100, err := database.Queries.GetTeamPer100Possesions(ctx,
 		sqlc.GetTeamPer100PossesionsParams{Abbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -133,8 +133,8 @@ func TeamPer100PossStatsHandler(w http.ResponseWriter, r *http.Request) {
 func TeamTotalsStatsHandler(w http.ResponseWriter, r *http.Request) {
 	abbr := chi.URLParam(r, "teamId")
 	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(seasonFromKey).(int))
-	seasonTo := int32(ctx.Value(seasonToKey).(int))
+	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
 
 	totals, err := database.Queries.GetTeamTotals(ctx,
 		sqlc.GetTeamTotalsParams{Abbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
