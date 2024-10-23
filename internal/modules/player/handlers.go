@@ -289,7 +289,6 @@ func PlayerAwardHandler(w http.ResponseWriter, r *http.Request) {
 
 	playerAward, err := database.Queries.GetPlayerAwards(ctx, sqlc.GetPlayerAwardsParams{PlayerID: int32(playerId)})
 
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Error doing your query"))
@@ -318,9 +317,8 @@ func PlayerAwardWinnerHandler(w http.ResponseWriter, r *http.Request) {
 		seasonToInt, _ = strconv.Atoi(seasonTo)
 	}
 
-
 	awards, err := database.Queries.GetAwardWinners(r.Context(), sqlc.GetAwardWinnersParams{SeasonYear: int32(seasonFromInt), SeasonYear_2: int32(seasonToInt)})
-  
+
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Error doing your query"))
@@ -451,5 +449,36 @@ func AllTeamTypeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, allTeams)
+
+}
+
+func AllStarHandler(w http.ResponseWriter, r *http.Request) {
+	seasonFrom := r.URL.Query().Get("seasonFrom")
+	seasonTo := r.URL.Query().Get("seasonTo")
+	search := r.URL.Query().Get("search")
+
+	var seasonFromInt int
+	var seasonToInt int
+
+	if len(seasonFrom) == 0 {
+		seasonFromInt = 1800
+	} else {
+		seasonFromInt, _ = strconv.Atoi(seasonFrom)
+	}
+
+	if len(seasonTo) == 0 {
+		seasonToInt = time.Now().Year()
+	} else {
+		seasonToInt, _ = strconv.Atoi(seasonTo)
+	}
+
+	allStars, err := database.Queries.GetAllStars(r.Context(), sqlc.GetAllStarsParams{Lower: search, SeasonYear: int32(seasonFromInt), SeasonYear_2: int32(seasonToInt)})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error doing your query"))
+		return
+	}
+
+	render.JSON(w, r, allStars)
 
 }
