@@ -5,20 +5,23 @@ import (
 	"NBAPI/internal/database"
 	"NBAPI/internal/modules/player"
 	"NBAPI/internal/modules/team"
+	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
 	httprateredis "github.com/go-chi/httprate-redis"
+
+	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
-	// TODO: gracefull shutdown
 
 	r.Use(httprate.Limit(
 		100,
@@ -44,12 +47,33 @@ func (s *Server) RegisterRoutes() http.Handler {
 	if config.Config.AppEnv == "local" {
 		r.Mount("/debug", middleware.Profiler())
 	}
+	api := humachi.New(r, huma.DefaultConfig("My API", "1.0.0"))
 
-	r.Get("/", s.HelloWorldHandler)
+	huma.Get(api, "/", s.HelloWorldHandler)
 	r.Route("/players", player.Router)
 	r.Route("/teams", team.Router)
 
 	r.Get("/health", s.healthHandler)
+
+	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<!doctype html>
+<html>
+  <head>
+    <title>API Reference</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <script
+      id="api-reference"
+      data-url="/openapi.json"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  </body>
+</html>`))
+	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
@@ -64,16 +88,16 @@ func (s *Server) RegisterRoutes() http.Handler {
 	return r
 }
 
-func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
+type GreetingOutput struct {
+	Body struct {
+		Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
 	}
+}
 
-	_, _ = w.Write(jsonResp)
+func (s *Server) HelloWorldHandler(ctx context.Context, input *struct{}) (*GreetingOutput, error) {
+	resp := &GreetingOutput{}
+	resp.Body.Message = "Hello world"
+	return resp, nil
 }
 
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
