@@ -4,6 +4,7 @@ sql:
     queries:
       - "data/query.sql"
       - "data/teams.sql"
+      - "data/players.sql"
     schema:
       - "data/schema.sql"
     gen:
