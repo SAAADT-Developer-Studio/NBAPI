@@ -258,13 +258,16 @@ func PlayerAwardHandler(w http.ResponseWriter, r *http.Request) {
 	_playerId := chi.URLParam(r, "playerId")
 	playerId, playerIdErr := strconv.Atoi(_playerId)
 
+	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+
 	if playerIdErr != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Your playerId is not a number"))
 		return
 	}
 
-	playerAward, err := database.Queries.GetPlayerAwards(ctx, sqlc.GetPlayerAwardsParams{PlayerID: int32(playerId)})
+	playerAward, err := database.Queries.GetPlayerAwards(ctx, sqlc.GetPlayerAwardsParams{PlayerID: int32(playerId), SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -280,7 +283,7 @@ func PlayerAwardWinnerHandler(w http.ResponseWriter, r *http.Request) {
 	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
 	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
 
-	awards, err := database.Queries.GetAwardWinners(r.Context(), sqlc.GetAwardWinnersParams{SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
+	awards, err := database.Queries.GetPlayerAwardWinners(r.Context(), sqlc.GetPlayerAwardWinnersParams{SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

@@ -51,3 +51,29 @@ select player_shooting.* from player
   inner join player_shooting on player_shooting.player_id = player.id
   where player.id = $1
   and player_shooting.season_year between $2 and $3;
+
+-- name: GetAllStars :many
+select * from all_stars where lower(playerFullName) like '%' || lower($1) || '%'  and season_year between $2 and $3;
+
+-- name: GetPlayerAwards :many
+SELECT * FROM player_awards where player_id = $1 and season_year BETWEEN $2 and $3;
+
+-- name: GetPlayerAllTeams :many
+SELECT * FROM all_teams JOIN player on player.id = all_teams.player_id where player_id = $1 and season_year BETWEEN $2 and $3;
+
+-- name: GetAllTeams :many
+SELECT * FROM all_teams JOIN player on player.id = all_teams.player_id and season_year BETWEEN $1 and $2;
+
+-- name: GetAllTeamsType :many
+SELECT * FROM all_teams JOIN player on player.id = all_teams.player_id where "type" = $1 and season_year BETWEEN $2 and $3;
+
+-- name: GetPlayerAwardWinners :many
+SELECT *
+FROM player_awards as pa
+WHERE (pa.season_year, pa.award, pa.share) IN (
+    SELECT season_year, award, MAX(share) AS max_share
+    FROM player_awards px
+    GROUP BY px.season_year, px.award
+    HAVING px.season_year BETWEEN $1 AND $2
+);
+

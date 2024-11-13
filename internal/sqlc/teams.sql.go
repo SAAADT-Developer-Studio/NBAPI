@@ -194,11 +194,11 @@ type GetTeamPerGameRow struct {
 	Fg         float32 `json:"fg"`
 	Fga        float32 `json:"fga"`
 	FgPercent  float32 `json:"fg_percent"`
-	P3         int32   `json:"p3"`
-	Pa3        int32   `json:"pa3"`
+	P3         float32 `json:"p3"`
+	Pa3        float32 `json:"pa3"`
 	PPercent3  float32 `json:"p_percent3"`
-	P2         int32   `json:"p2"`
-	Pa2        int32   `json:"pa2"`
+	P2         float32 `json:"p2"`
+	Pa2        float32 `json:"pa2"`
 	PPercent2  float32 `json:"p_percent2"`
 	EfgPercent float32 `json:"efg_percent"`
 	Ft         float32 `json:"ft"`
