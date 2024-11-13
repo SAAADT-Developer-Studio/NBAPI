@@ -123,7 +123,7 @@ func TeamPer100PossStatsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logrus.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching team per game stats"))
+		w.Write([]byte("Error fetching team per 100 possesions stats"))
 		return
 	}
 
@@ -143,10 +143,69 @@ func TeamTotalsStatsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logrus.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching team per game stats"))
+		w.Write([]byte("Error fetching team totals stats"))
 		return
 	}
 
 	render.JSON(w, r, totals)
+}
 
+func TeamTotalsOpponentsHandler(w http.ResponseWriter, r *http.Request) {
+	abbr := chi.URLParam(r, "teamId")
+	ctx := r.Context()
+	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+
+	totals, err := database.Queries.GetOpponentsTotals(ctx,
+		sqlc.GetOpponentsTotalsParams{TeamAbbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
+	)
+
+	if err != nil {
+		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error fetching team totals stats"))
+		return
+	}
+
+	render.JSON(w, r, totals)
+}
+
+func TeamPerGameOpponentsHandler(w http.ResponseWriter, r *http.Request) {
+	abbr := chi.URLParam(r, "teamId")
+	ctx := r.Context()
+	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+
+	perGame, err := database.Queries.GetOpponentsPerGame(ctx,
+		sqlc.GetOpponentsPerGameParams{TeamAbbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
+	)
+
+	if err != nil {
+		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error fetching team per game stats"))
+		return
+	}
+
+	render.JSON(w, r, perGame)
+}
+
+func TeamPer100PossOpponentsHandler(w http.ResponseWriter, r *http.Request) {
+	abbr := chi.URLParam(r, "teamId")
+	ctx := r.Context()
+	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+
+	per100poss, err := database.Queries.GetOpponentsPer100Possesions(ctx,
+		sqlc.GetOpponentsPer100PossesionsParams{TeamAbbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
+	)
+
+	if err != nil {
+		logrus.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error fetching team per game stats"))
+		return
+	}
+
+	render.JSON(w, r, per100poss)
 }

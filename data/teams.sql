@@ -41,3 +41,12 @@ select per_game.*, team_per_game.season_year from team
   where team.abbr = $1 and
     team_per_game.season_year between $2 and $3
   order by team_per_game.season_year desc;
+
+-- name: GetOpponentsTotals :many
+select * from opponents_totals where team_abbr = $1 and season_year between $2 and $3 order by season_year desc;
+
+-- name: GetOpponentsPer100Possesions :many
+select * from opponents_per_100_possesions where team_abbr = $1 and season_year between $2 and $3 order by season_year desc;
+
+-- name: GetOpponentsPerGame :many
+select * from opponents_per_game where team_abbr = $1 and season_year between $2 and $3 order by season_year desc;
