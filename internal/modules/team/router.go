@@ -18,5 +18,11 @@ func Router(router chi.Router) {
 			r.Get("/per100poss", TeamPer100PossStatsHandler)
 			r.Get("/totals", TeamTotalsStatsHandler)
 		})
+
+		r.Route("/opponents", func(r chi.Router) {
+			r.Get("/pergame", TeamPerGameOpponentsHandler)
+			r.Get("/per100poss", TeamPer100PossOpponentsHandler)
+			r.Get("/totals", TeamTotalsOpponentsHandler)
+		})
 	})
 }

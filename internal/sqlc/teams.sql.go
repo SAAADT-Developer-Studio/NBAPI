@@ -11,6 +11,96 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getOpponentsPer100Possesions = `-- name: GetOpponentsPer100Possesions :many
+select team_abbr, per_100_id, season_year from opponents_per_100_possesions where team_abbr = $1 and season_year between $2 and $3 order by season_year desc
+`
+
+type GetOpponentsPer100PossesionsParams struct {
+	TeamAbbr     string `json:"team_abbr"`
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+}
+
+func (q *Queries) GetOpponentsPer100Possesions(ctx context.Context, arg GetOpponentsPer100PossesionsParams) ([]OpponentsPer100Possesion, error) {
+	rows, err := q.db.Query(ctx, getOpponentsPer100Possesions, arg.TeamAbbr, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OpponentsPer100Possesion
+	for rows.Next() {
+		var i OpponentsPer100Possesion
+		if err := rows.Scan(&i.TeamAbbr, &i.Per100ID, &i.SeasonYear); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getOpponentsPerGame = `-- name: GetOpponentsPerGame :many
+select team_abbr, per_game_id, season_year from opponents_per_game where team_abbr = $1 and season_year between $2 and $3 order by season_year desc
+`
+
+type GetOpponentsPerGameParams struct {
+	TeamAbbr     string `json:"team_abbr"`
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+}
+
+func (q *Queries) GetOpponentsPerGame(ctx context.Context, arg GetOpponentsPerGameParams) ([]OpponentsPerGame, error) {
+	rows, err := q.db.Query(ctx, getOpponentsPerGame, arg.TeamAbbr, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OpponentsPerGame
+	for rows.Next() {
+		var i OpponentsPerGame
+		if err := rows.Scan(&i.TeamAbbr, &i.PerGameID, &i.SeasonYear); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getOpponentsTotals = `-- name: GetOpponentsTotals :many
+select team_abbr, total_id, season_year from opponents_totals where team_abbr = $1 and season_year between $2 and $3 order by season_year desc
+`
+
+type GetOpponentsTotalsParams struct {
+	TeamAbbr     string `json:"team_abbr"`
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+}
+
+func (q *Queries) GetOpponentsTotals(ctx context.Context, arg GetOpponentsTotalsParams) ([]OpponentsTotal, error) {
+	rows, err := q.db.Query(ctx, getOpponentsTotals, arg.TeamAbbr, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OpponentsTotal
+	for rows.Next() {
+		var i OpponentsTotal
+		if err := rows.Scan(&i.TeamAbbr, &i.TotalID, &i.SeasonYear); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTeam = `-- name: GetTeam :one
 select
   abbr, fullname
