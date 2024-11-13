@@ -43,10 +43,10 @@ select per_game.*, team_per_game.season_year from team
   order by team_per_game.season_year desc;
 
 -- name: GetOpponentsTotals :many
-select * from opponents_totals where team_abbr = $1 and season_year between $2 and $3 order by season_year desc;
+select * from opponents_totals join totals on opponents_totals.total_id = totals.id where team_abbr = $1 and season_year between $2 and $3 order by season_year desc;
 
 -- name: GetOpponentsPer100Possesions :many
-select * from opponents_per_100_possesions where team_abbr = $1 and season_year between $2 and $3 order by season_year desc;
+select * from opponents_per_100_possesions join per_100_possesions on per_100_possesions.id = opponents_per_100_possesions.per_100_id where team_abbr = $1 and season_year between $2 and $3 order by season_year desc;
 
 -- name: GetOpponentsPerGame :many
-select * from opponents_per_game where team_abbr = $1 and season_year between $2 and $3 order by season_year desc;
+select * from opponents_per_game join per_game on opponents_per_game.per_game_id = per_game.id where team_abbr = $1 and season_year between $2 and $3 order by season_year desc;
