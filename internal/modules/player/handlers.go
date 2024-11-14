@@ -244,34 +244,33 @@ func PlayerTotalsHandler(ctx context.Context, input *PlayerInput) (*PlayerTotals
 	return response, nil
 }
 
-func PlayerPer36Handler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	_playerId := chi.URLParam(r, "playerId")
-	playerId, playerIdErr := strconv.Atoi(_playerId)
+type PlayerPer36ResponseBody struct {
+	Per36 []sqlc.PlayerPer36 `json:"per36"`
+}
 
-	if playerIdErr != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Your playerId is not a number"))
-		return
-	}
+type PlayerPer36Response struct {
+	Body PlayerPer36ResponseBody
+}
 
-	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
+func PlayerPer36Handler(ctx context.Context, input *PlayerInput) (*PlayerPer36Response, error) {
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
+	playerId := int32(input.PlayerId)
 
 	per36, err := database.Queries.GetPlayerPer36(ctx, sqlc.GetPlayerPer36Params{
-		ID:           int32(playerId),
+		ID:           playerId,
 		SeasonYear:   seasonFrom,
 		SeasonYear_2: seasonTo,
 	})
 
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error: %s", err)))
-		return
+		return nil, huma.Error500InternalServerError("error fetching player Per 36", err)
 	}
 
-	render.JSON(w, r, per36)
+	response := &PlayerPer36Response{
+		Body: PlayerPer36ResponseBody{Per36: per36},
+	}
+	return response, nil
 }
 
 func PlayerAdvancedHandler(w http.ResponseWriter, r *http.Request) {

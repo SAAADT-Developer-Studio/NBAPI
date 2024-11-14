@@ -93,12 +93,12 @@ func RegisterRoutes(api huma.API) {
 		Summary: "Get player per 100 possessions stats",
 	}, PlayerPer100Handler)
 
-	// huma.Register(api, huma.Operation{
-	// 	Method:  http.MethodGet,
-	// 	Path:    "/players/{playerId}/stats/per36m",
-	// 	Tags:    []string{"players"},
-	// 	Summary: "Get player per 36 minutes stats",
-	// }, PlayerPer36Handler)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/players/{playerId}/stats/per36m",
+		Tags:    []string{"players"},
+		Summary: "Get player per 36 minutes stats",
+	}, PlayerPer36Handler)
 
 	// huma.Register(api, huma.Operation{
 	// 	Method:  http.MethodGet,
@@ -127,7 +127,7 @@ func Router(router chi.Router) {
 			// r.Get("/totals", PlayerTotalsHandler)
 			// r.Get("/shooting", PlayerShootingHandler)
 			// r.Get("/per100poss", PlayerPer100Handler)
-			r.Get("/per36m", PlayerPer36Handler)
+			// r.Get("/per36m", PlayerPer36Handler)
 			r.Get("/advanced", PlayerAdvancedHandler)
 		})
 	})
