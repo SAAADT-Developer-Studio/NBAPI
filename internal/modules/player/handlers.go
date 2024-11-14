@@ -381,11 +381,7 @@ type PlayerAwardWinnersResponse struct {
 	Body PlayerAwardWinnersResponseBody
 }
 
-type PlayerAwardWinnersInput struct {
-	inputs.SeasonRangeParams
-}
-
-func PlayerAwardWinnerHandler(ctx context.Context, input *PlayerAwardWinnersInput) (*PlayerAwardWinnersResponse, error) {
+func PlayerAwardWinnerHandler(ctx context.Context, input *inputs.SeasonRangeParams) (*PlayerAwardWinnersResponse, error) {
 	seasonFrom := int32(input.SeasonFrom)
 	seasonTo := int32(input.SeasonTo)
 
@@ -425,20 +421,27 @@ func AllTeamPlayerHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func AllTeamHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
+type AllTeamsResponseBody struct {
+	Teams []sqlc.GetAllTeamsRow `json:"teams"`
+}
 
-	allTeams, err := database.Queries.GetAllTeams(r.Context(), sqlc.GetAllTeamsParams{SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
+type AllTeamsResponse struct {
+	Body AllTeamsResponseBody
+}
+
+func AllTeamHandler(ctx context.Context, input *inputs.SeasonRangeParams) (*AllTeamsResponse, error) {
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
+
+	allTeams, err := database.Queries.GetAllTeams(ctx, sqlc.GetAllTeamsParams{SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Error doing your query"))
-		return
+		return nil, err
 	}
 
-	render.JSON(w, r, allTeams)
-
+	response := &AllTeamsResponse{
+		Body: AllTeamsResponseBody{Teams: allTeams},
+	}
+	return response, nil
 }
 
 func includes(arr []string, element string) bool {
