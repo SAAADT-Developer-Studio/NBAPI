@@ -471,19 +471,31 @@ func AllTeamTypeHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func AllStarHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
-	search := r.URL.Query().Get("search")
+type AllStarsInput struct {
+	inputs.SeasonRangeParams
+	Search string `query:"search" doc:"Filter results based on a search string."`
+}
 
-	allStars, err := database.Queries.GetAllStars(r.Context(), sqlc.GetAllStarsParams{Lower: search, SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
+type AllStarsResponseBody struct {
+	Players []sqlc.AllStar `json:"players"`
+}
+
+type AllStarsResponse struct {
+	Body AllStarsResponseBody
+}
+
+func AllStarHandler(ctx context.Context, input *AllStarsInput) (*AllStarsResponse, error) {
+	search := input.Search
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
+
+	allStars, err := database.Queries.GetAllStars(ctx, sqlc.GetAllStarsParams{Lower: search, SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Error doing your query"))
-		return
+		return nil, err
 	}
 
-	render.JSON(w, r, allStars)
-
+	response := &AllStarsResponse{
+		Body: AllStarsResponseBody{Players: allStars},
+	}
+	return response, nil
 }
