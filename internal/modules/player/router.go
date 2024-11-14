@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/go-chi/chi/v5"
 )
 
 func RegisterRoutes(api huma.API) {
@@ -100,36 +99,10 @@ func RegisterRoutes(api huma.API) {
 		Summary: "Get player per 36 minutes stats",
 	}, PlayerPer36Handler)
 
-	// huma.Register(api, huma.Operation{
-	// 	Method:  http.MethodGet,
-	// 	Path:    "/players/{playerId}/stats/advanced",
-	// 	Tags:    []string{"players"},
-	// 	Summary: "Get player advanced stats",
-	// }, PlayerAdvancedHandler)
-}
-
-func Router(router chi.Router) {
-	// router.Use(inputs.SeasonYearMiddleware)
-	// router.Get("/", PlayersHandler)
-	// router.Get("/all-stars", AllStarHandler)
-	// router.Get("/awards", PlayerAwardWinnerHandler)
-	// router.Route("/all-teams", func(r chi.Router) {
-	// r.Get("/", AllTeamHandler)
-	// r.Get("/{awardType}", AllTeamTypeHandler)
-	// })
-
-	router.Route("/{playerId}", func(r chi.Router) {
-		// r.Get("/", PlayerHandler)
-		// r.Get("/award-votes", PlayerAwardHandler)
-		// r.Get("/all-teams", AllTeamPlayerHandler)
-		r.Route("/stats", func(r chi.Router) {
-			// r.Get("/pergame", PlayerPerGameHandler)
-			// r.Get("/totals", PlayerTotalsHandler)
-			// r.Get("/shooting", PlayerShootingHandler)
-			// r.Get("/per100poss", PlayerPer100Handler)
-			// r.Get("/per36m", PlayerPer36Handler)
-			r.Get("/advanced", PlayerAdvancedHandler)
-		})
-	})
-
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/players/{playerId}/stats/advanced",
+		Tags:    []string{"players"},
+		Summary: "Get player advanced stats",
+	}, PlayerAdvancedHandler)
 }

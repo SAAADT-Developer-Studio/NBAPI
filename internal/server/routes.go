@@ -50,7 +50,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 	api := humachi.New(r, huma.DefaultConfig("My API", "1.0.0"))
 
 	huma.Get(api, "/", s.HelloWorldHandler)
-	r.Route("/players", player.Router) // TODO: remove me
 	player.RegisterRoutes(api)
 	team.RegisterRoutes(api)
 

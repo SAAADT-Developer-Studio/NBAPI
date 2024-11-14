@@ -5,14 +5,9 @@ import (
 	"NBAPI/internal/inputs"
 	"NBAPI/internal/sqlc"
 	"context"
-	"fmt"
-	"net/http"
 	"slices"
-	"strconv"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -273,34 +268,33 @@ func PlayerPer36Handler(ctx context.Context, input *PlayerInput) (*PlayerPer36Re
 	return response, nil
 }
 
-func PlayerAdvancedHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	_playerId := chi.URLParam(r, "playerId")
-	playerId, playerIdErr := strconv.Atoi(_playerId)
+type PlayerAdvancedResponseBody struct {
+	Advanced []sqlc.Advanced `json:"advanced"`
+}
 
-	if playerIdErr != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Your playerId is not a number"))
-		return
-	}
+type PlayerAdvancedResponse struct {
+	Body PlayerAdvancedResponseBody
+}
 
-	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
+func PlayerAdvancedHandler(ctx context.Context, input *PlayerInput) (*PlayerAdvancedResponse, error) {
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
+	playerId := int32(input.PlayerId)
 
 	advanced, err := database.Queries.GetPlayerAdvanced(ctx, sqlc.GetPlayerAdvancedParams{
-		ID:           int32(playerId),
+		ID:           playerId,
 		SeasonYear:   seasonFrom,
 		SeasonYear_2: seasonTo,
 	})
 
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error: %s", err)))
-		return
+		return nil, huma.Error500InternalServerError("error fetching player advanced stats", err)
 	}
 
-	render.JSON(w, r, advanced)
+	response := &PlayerAdvancedResponse{
+		Body: PlayerAdvancedResponseBody{Advanced: advanced},
+	}
+	return response, nil
 }
 
 type PlayerShootingResponseBody struct {
