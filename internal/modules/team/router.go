@@ -1,28 +1,65 @@
 package team
 
 import (
-	"NBAPI/internal/middleware"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/danielgtaylor/huma/v2"
 )
 
-func Router(router chi.Router) {
-	router.Use(middleware.Pagination)
-	router.Get("/", TeamsHandler)
-	router.Route("/{teamId}", func(r chi.Router) {
-		r.Use(middleware.SeasonYearMiddleware)
-		r.Get("/", TeamHandler)
+func RegisterRoutes(api huma.API) {
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/teams",
+		Tags:    []string{"teams"},
+		Summary: "List all teams",
+	}, TeamsHandler)
 
-		r.Route("/stats", func(r chi.Router) {
-			r.Get("/pergame", TeamPerGameStatsHandler)
-			r.Get("/per100poss", TeamPer100PossStatsHandler)
-			r.Get("/totals", TeamTotalsStatsHandler)
-		})
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/teams/{teamId}",
+		Tags:    []string{"teams"},
+		Summary: "Get team by ID",
+	}, TeamHandler)
 
-		r.Route("/opponents", func(r chi.Router) {
-			r.Get("/pergame", TeamPerGameOpponentsHandler)
-			r.Get("/per100poss", TeamPer100PossOpponentsHandler)
-			r.Get("/totals", TeamTotalsOpponentsHandler)
-		})
-	})
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/teams/{teamId}/stats/pergame",
+		Tags:    []string{"teams"},
+		Summary: "Get team per game stats",
+	}, TeamPerGameStatsHandler)
+
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/teams/{teamId}/stats/per100poss",
+		Tags:    []string{"teams"},
+		Summary: "Get team per game stats",
+	}, TeamPer100PossStatsHandler)
+
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/teams/{teamId}/stats/totals",
+		Tags:    []string{"teams"},
+		Summary: "Get team totals stats",
+	}, TeamTotalsStatsHandler)
+
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/teams/{teamId}/opponents/pergame",
+		Tags:    []string{"teams"},
+		Summary: "Get team opponents per game stats",
+	}, TeamPerGameOpponentsHandler)
+
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/teams/{teamId}/opponents/per100poss",
+		Tags:    []string{"teams"},
+		Summary: "Get team opponents per game stats",
+	}, TeamPer100PossOpponentsHandler)
+
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/teams/{teamId}/opponents/totals",
+		Tags:    []string{"teams"},
+		Summary: "Get team opponents totals stats",
+	}, TeamTotalsOpponentsHandler)
 }

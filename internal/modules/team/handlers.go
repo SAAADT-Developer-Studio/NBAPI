@@ -4,59 +4,78 @@ import (
 	"NBAPI/internal/database"
 	"NBAPI/internal/middleware"
 	"NBAPI/internal/sqlc"
+	"context"
 	"fmt"
-	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/sirupsen/logrus"
 )
 
-type TeamsResponse struct {
+type TeamsResponseBody struct {
 	Teams    []sqlc.Team `json:"teams"`
-	NextPage *string     `json:"next_page"`
+	NextPage *string     `json:"next_page" example:"NYK" doc:"Next page cursor"`
 }
 
-func TeamsHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	search := r.URL.Query().Get("search")
-	pageCursor := ctx.Value(middleware.PageCursorKey).(string)
-	pageSize := ctx.Value(middleware.PageSizeKey).(int)
+type TeamsResponse struct {
+	Body TeamsResponseBody
+}
+
+type TeamsInput struct {
+	middleware.PaginationParams
+	Search string `query:"search" doc:"Filter results based on a search string."`
+}
+
+func TeamsHandler(ctx context.Context, input *TeamsInput) (*TeamsResponse, error) {
+	search := input.Search
+	pageCursor := input.Cursor
+	pageSize := input.Limit
 	teams, err := database.Queries.GetTeams(ctx, sqlc.GetTeamsParams{Search: search, PageSize: int32(pageSize), Cursor: pageCursor})
-	logrus.Info("search", search, len(search))
+	fmt.Println("teams", teams)
+
 	if err != nil {
 		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching teams"))
-		return
+		return nil, err
 	}
+
 	if teams == nil {
 		teams = []sqlc.Team{}
 	}
 	var nextPage *string
 	if len(teams) > pageSize {
-		teams = teams[:pageSize+1]
-		nextPage = &teams[len(teams)-1].Abbr
+		nextPage = &teams[pageSize].Abbr
+		teams = teams[:pageSize]
 	}
 
-	render.JSON(w, r, TeamsResponse{
-		Teams:    teams[:len(teams)-1],
-		NextPage: nextPage,
-	})
+	response := &TeamsResponse{
+		Body: TeamsResponseBody{
+			Teams:    teams,
+			NextPage: nextPage,
+		},
+	}
+
+	return response, nil
 }
 
-type TeamResponse struct {
+type TeamResponseBody struct {
 	Team       sqlc.Team                `json:"team"`
 	Totals     []sqlc.GetTeamTotalsRow  `json:"totals"`
 	Per100Poss []sqlc.Per100Possesion   `json:"per_100_possesions"`
 	PerGame    []sqlc.GetTeamPerGameRow `json:"per_game"`
 }
 
-func TeamHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	abbr := chi.URLParam(r, "teamId")
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+type TeamResponse struct {
+	Body TeamResponseBody
+}
+
+type TeamInput struct {
+	Abbr string `path:"teamId" doc:"The team ID to fetch."`
+	middleware.SeasonRangeParams
+}
+
+func TeamHandler(ctx context.Context, input *TeamInput) (*TeamResponse, error) {
+	abbr := input.Abbr
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
 	team, teamErr := database.Queries.GetTeam(ctx, abbr)
 	totalsRows, totalsErr := database.Queries.GetTeamTotals(ctx,
 		sqlc.GetTeamTotalsParams{Abbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -70,31 +89,33 @@ func TeamHandler(w http.ResponseWriter, r *http.Request) {
 
 	if teamErr != nil {
 		logrus.Error(teamErr)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("Error fetching team with id %s", abbr)))
-		return
+		return nil, huma.Error500InternalServerError(fmt.Sprintf("Error fetching team with id %s", abbr))
 	}
 
 	if totalsErr != nil || per100Err != nil || perGameErr != nil {
 		logrus.Error(totalsErr)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching subtables"))
-		return
+		return nil, huma.Error500InternalServerError("Error fetching subtables", teamErr, per100Err, perGameErr)
 	}
 
-	response := TeamResponse{Team: team, Totals: []sqlc.GetTeamTotalsRow{}, Per100Poss: []sqlc.Per100Possesion{}, PerGame: []sqlc.GetTeamPerGameRow{}}
-	response.Totals = totalsRows
-	response.Per100Poss = per100Rows
-	response.PerGame = perGameRows
+	response := &TeamResponse{
+		Body: TeamResponseBody{Team: team, Totals: totalsRows, Per100Poss: per100Rows, PerGame: perGameRows},
+	}
 
-	render.JSON(w, r, response)
+	return response, nil
 }
 
-func TeamPerGameStatsHandler(w http.ResponseWriter, r *http.Request) {
-	abbr := chi.URLParam(r, "teamId")
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+type TeamPerGameResponse struct {
+	Body []sqlc.GetTeamPerGameRow
+}
+
+type TeamPerGameInput struct {
+	TeamInput
+}
+
+func TeamPerGameStatsHandler(ctx context.Context, input *TeamPerGameInput) (*TeamPerGameResponse, error) {
+	abbr := input.Abbr
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
 
 	perGame, err := database.Queries.GetTeamPerGame(ctx,
 		sqlc.GetTeamPerGameParams{Abbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -102,19 +123,28 @@ func TeamPerGameStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching team per game stats"))
-		return
+		return nil, err
 	}
 
-	render.JSON(w, r, perGame)
+	response := &TeamPerGameResponse{
+		Body: perGame,
+	}
+
+	return response, nil
 }
 
-func TeamPer100PossStatsHandler(w http.ResponseWriter, r *http.Request) {
-	abbr := chi.URLParam(r, "teamId")
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+type TeamPer100PossResponse struct {
+	Body []sqlc.Per100Possesion
+}
+
+type TeamPer100PossInput struct {
+	TeamInput
+}
+
+func TeamPer100PossStatsHandler(ctx context.Context, input *TeamPer100PossInput) (*TeamPer100PossResponse, error) {
+	abbr := input.Abbr
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
 
 	per100, err := database.Queries.GetTeamPer100Possesions(ctx,
 		sqlc.GetTeamPer100PossesionsParams{Abbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -122,19 +152,22 @@ func TeamPer100PossStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching team per 100 possesions stats"))
-		return
+		return nil, err
 	}
-
-	render.JSON(w, r, per100)
+	return &TeamPer100PossResponse{Body: per100}, nil
 }
 
-func TeamTotalsStatsHandler(w http.ResponseWriter, r *http.Request) {
-	abbr := chi.URLParam(r, "teamId")
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+type TeamTotalsResponse struct {
+	Body []sqlc.GetTeamTotalsRow
+}
+type TeamTotalsInput struct {
+	TeamInput
+}
+
+func TeamTotalsStatsHandler(ctx context.Context, input *TeamTotalsInput) (*TeamTotalsResponse, error) {
+	abbr := input.Abbr
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
 
 	totals, err := database.Queries.GetTeamTotals(ctx,
 		sqlc.GetTeamTotalsParams{Abbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -142,19 +175,23 @@ func TeamTotalsStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching team totals stats"))
-		return
+		return nil, err
 	}
-
-	render.JSON(w, r, totals)
+	return &TeamTotalsResponse{Body: totals}, nil
 }
 
-func TeamTotalsOpponentsHandler(w http.ResponseWriter, r *http.Request) {
-	abbr := chi.URLParam(r, "teamId")
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+type TeamOpponentsTotalsResponse struct {
+	Body []sqlc.OpponentsTotal
+}
+
+type TeamOpponentsTotalsInput struct {
+	TeamInput
+}
+
+func TeamTotalsOpponentsHandler(ctx context.Context, input *TeamInput) (*TeamOpponentsTotalsResponse, error) {
+	abbr := input.Abbr
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
 
 	totals, err := database.Queries.GetOpponentsTotals(ctx,
 		sqlc.GetOpponentsTotalsParams{TeamAbbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -162,19 +199,23 @@ func TeamTotalsOpponentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching team totals stats"))
-		return
+		return nil, err
 	}
-
-	render.JSON(w, r, totals)
+	return &TeamOpponentsTotalsResponse{Body: totals}, nil
 }
 
-func TeamPerGameOpponentsHandler(w http.ResponseWriter, r *http.Request) {
-	abbr := chi.URLParam(r, "teamId")
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+type TeamOpponentsPerGameResponse struct {
+	Body []sqlc.OpponentsPerGame
+}
+
+type TeamOpponentsPerGameInput struct {
+	TeamInput
+}
+
+func TeamPerGameOpponentsHandler(ctx context.Context, input *TeamOpponentsPerGameInput) (*TeamOpponentsPerGameResponse, error) {
+	abbr := input.Abbr
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
 
 	perGame, err := database.Queries.GetOpponentsPerGame(ctx,
 		sqlc.GetOpponentsPerGameParams{TeamAbbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -182,19 +223,23 @@ func TeamPerGameOpponentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching team per game stats"))
-		return
+		return nil, err
 	}
 
-	render.JSON(w, r, perGame)
+	return &TeamOpponentsPerGameResponse{Body: perGame}, nil
 }
 
-func TeamPer100PossOpponentsHandler(w http.ResponseWriter, r *http.Request) {
-	abbr := chi.URLParam(r, "teamId")
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+type TeamOpponentsPer100PossResponse struct {
+	Body []sqlc.OpponentsPer100Possesion
+}
+type TeamOpponentsPer100PossInput struct {
+	TeamInput
+}
+
+func TeamPer100PossOpponentsHandler(ctx context.Context, input *TeamOpponentsPer100PossInput) (*TeamOpponentsPer100PossResponse, error) {
+	abbr := input.Abbr
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
 
 	per100poss, err := database.Queries.GetOpponentsPer100Possesions(ctx,
 		sqlc.GetOpponentsPer100PossesionsParams{TeamAbbr: abbr, SeasonYear: seasonFrom, SeasonYear_2: seasonTo},
@@ -202,10 +247,8 @@ func TeamPer100PossOpponentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logrus.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error fetching team per game stats"))
-		return
+		return nil, err
 	}
 
-	render.JSON(w, r, per100poss)
+	return &TeamOpponentsPer100PossResponse{Body: per100poss}, nil
 }
