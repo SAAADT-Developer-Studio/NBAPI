@@ -1,7 +1,6 @@
 package player
 
 import (
-	"NBAPI/internal/inputs"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -38,12 +37,12 @@ func RegisterRoutes(api huma.API) {
 		Summary: "List players all teams", // TODO: what should sumamry be?
 	}, AllTeamHandler)
 
-	// huma.Register(api, huma.Operation{
-	// 	Method:  http.MethodGet,
-	// 	Path:    "/players/all-teams/{awardType}", // TODO: awardType should be an enum
-	// 	Tags:    []string{"players"},
-	// 	Summary: "List all teams by award type",
-	// }, AllTeamTypeHandler)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/players/all-teams/{awardType}", // TODO: awardType should be an enum
+		Tags:    []string{"players"},
+		Summary: "List all teams by award type",
+	}, AllTeamTypeHandler)
 
 	// huma.Register(api, huma.Operation{
 	// 	Method:  http.MethodGet,
@@ -110,13 +109,13 @@ func RegisterRoutes(api huma.API) {
 }
 
 func Router(router chi.Router) {
-	router.Use(inputs.SeasonYearMiddleware)
+	// router.Use(inputs.SeasonYearMiddleware)
 	// router.Get("/", PlayersHandler)
 	// router.Get("/all-stars", AllStarHandler)
 	// router.Get("/awards", PlayerAwardWinnerHandler)
 	router.Route("/all-teams", func(r chi.Router) {
 		// r.Get("/", AllTeamHandler)
-		r.Get("/{awardType}", AllTeamTypeHandler)
+		// r.Get("/{awardType}", AllTeamTypeHandler)
 	})
 
 	router.Route("/{playerId}", func(r chi.Router) {

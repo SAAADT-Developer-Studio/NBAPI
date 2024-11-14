@@ -7,8 +7,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
@@ -444,20 +446,19 @@ func AllTeamHandler(ctx context.Context, input *inputs.SeasonRangeParams) (*AllT
 	return response, nil
 }
 
-func includes(arr []string, element string) bool {
-	for _, item := range arr {
-		if item == element {
-			return true
-		}
-	}
-	return false
+type AllTeamsTypeResponse struct {
+	Body []sqlc.GetAllTeamsTypeRow
 }
 
-func AllTeamTypeHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
-	awardType := chi.URLParam(r, "awardType")
+type AllTeamsTypeInput struct {
+	inputs.SeasonRangeParams
+	AwardType string `query:"awardType" enum:"All-Rookie,All-BAA,All-Defense,All-NBA,All-ABA" doc:"The type of award to filter by."`
+}
+
+func AllTeamTypeHandler(ctx context.Context, input *AllTeamsTypeInput) (*AllTeamsTypeResponse, error) {
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
+	awardType := input.AwardType
 
 	allowedAwardTypes :=
 		[]string{
@@ -467,21 +468,19 @@ func AllTeamTypeHandler(w http.ResponseWriter, r *http.Request) {
 			"All-NBA",
 			"All-ABA"}
 
-	if !includes(allowedAwardTypes, awardType) {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("The only allowed award types are: All-Rookie, All-BAA, All-Defense, All-NBA, All-ABA"))
-		return
+	if !slices.Contains(allowedAwardTypes, awardType) {
+		return nil, huma.Error400BadRequest("The only allowed award types are: All-Rookie, All-BAA, All-Defense, All-NBA, All-ABA")
 	}
 
-	allTeams, err := database.Queries.GetAllTeamsType(r.Context(), sqlc.GetAllTeamsTypeParams{Type: awardType, SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
+	allTeams, err := database.Queries.GetAllTeamsType(ctx, sqlc.GetAllTeamsTypeParams{Type: awardType, SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Error doing your query"))
-		return
+		return nil, err
 	}
 
-	render.JSON(w, r, allTeams)
-
+	response := &AllTeamsTypeResponse{
+		Body: allTeams,
+	}
+	return response, nil
 }
 
 type AllStarsInput struct {
