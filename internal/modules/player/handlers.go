@@ -384,29 +384,28 @@ func PlayerAwardWinnerHandler(ctx context.Context, input *inputs.SeasonRangePara
 	return response, nil
 }
 
-func AllTeamPlayerHandler(w http.ResponseWriter, r *http.Request) {
-	_playerId := chi.URLParam(r, "playerId")
-	playerId, playerIdErr := strconv.Atoi(_playerId)
+type AllTeamPlayerResponseBody struct {
+	Teams []sqlc.GetPlayerAllTeamsRow `json:"teams"`
+}
 
-	if playerIdErr != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Your playerId is not a number"))
-		return
-	}
+type AllTeamPlayerResponse struct {
+	Body AllTeamPlayerResponseBody
+}
 
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
+func AllTeamPlayerHandler(ctx context.Context, input *PlayerInput) (*AllTeamPlayerResponse, error) {
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
+	playerId := int32(input.PlayerId)
 
-	allTeamPlayer, err := database.Queries.GetPlayerAllTeams(r.Context(), sqlc.GetPlayerAllTeamsParams{PlayerID: int32(playerId), SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
+	allTeamPlayer, err := database.Queries.GetPlayerAllTeams(ctx, sqlc.GetPlayerAllTeamsParams{PlayerID: playerId, SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Error doing your query"))
-		return
+		return nil, huma.Error500InternalServerError("error fetching player all teams", err)
 	}
 
-	render.JSON(w, r, allTeamPlayer)
-
+	response := &AllTeamPlayerResponse{
+		Body: AllTeamPlayerResponseBody{Teams: allTeamPlayer},
+	}
+	return response, nil
 }
 
 type AllTeamsResponseBody struct {
