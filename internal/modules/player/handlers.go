@@ -4,6 +4,7 @@ import (
 	"NBAPI/internal/database"
 	"NBAPI/internal/middleware"
 	"NBAPI/internal/sqlc"
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -14,38 +15,41 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type PlayersResponse struct {
+type PlayersResponseBody struct {
 	Players  []sqlc.Player `json:"players"`
 	NextPage *int32        `json:"next_page"`
 }
 
-func PlayersHandler(w http.ResponseWriter, r *http.Request) {
-	search := r.URL.Query().Get("search")
-	pageSize := int32(r.Context().Value(middleware.PageSizeKey).(int))
+type PlayersResponse struct {
+	Body PlayersResponseBody
+}
 
-	pageCursorQuery := r.Context().Value(middleware.PageCursorKey).(string)
-	if len(pageCursorQuery) == 0 {
-		pageCursorQuery = "0" // not the best but it works so shut up
-	}
-	pageCursor, err := strconv.Atoi(pageCursorQuery)
-	if err != nil {
-		http.Error(w, "Invalid page cursor", http.StatusBadRequest)
-		return
-	}
+type PlayersInput struct {
+	middleware.PaginationParams
+	Cursor int    `query:"pageCursor" default:"0" doc:"Page cursor for pagination."`
+	Search string `query:"search" doc:"Filter results based on a search string."`
+}
 
-	players, err := database.Queries.GetPlayers(r.Context(), sqlc.GetPlayersParams{Search: search, PageSize: pageSize, Cursor: int32(pageCursor)})
+func PlayersHandler(ctx context.Context, input *PlayersInput) (*PlayersResponse, error) {
+	search := input.Search
+	pageSize := int32(input.Limit)
+	pageCursor := input.Cursor
+
+	players, err := database.Queries.GetPlayers(ctx, sqlc.GetPlayersParams{Search: search, PageSize: pageSize, Cursor: int32(pageCursor)})
 	if err != nil {
-		log.Error(err)
-		http.Error(w, "Error fetching players", http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	var nextPage *int32
-	if len(players) > 0 {
-		nextPage = &(players[len(players)-1].ID)
-		players = players[:len(players)-1]
+	if len(players) > int(pageSize) {
+		nextPage = &(players[pageSize].ID)
+		players = players[:pageSize]
 	}
-	render.JSON(w, r, PlayersResponse{Players: players, NextPage: nextPage})
+
+	response := &PlayersResponse{
+		Body: PlayersResponseBody{Players: players, NextPage: nextPage},
+	}
+	return response, nil
 }
 
 type PlayerResponse struct {
@@ -162,11 +166,6 @@ func PlayerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, playerResponse)
-}
-
-func keyExists(key string, m map[string]func() (interface{}, error)) bool {
-	_, exists := m[key]
-	return exists
 }
 
 func PlayerPerGameHandler(w http.ResponseWriter, r *http.Request) {
