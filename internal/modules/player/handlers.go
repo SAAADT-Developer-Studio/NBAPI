@@ -337,29 +337,28 @@ func PlayerShootingHandler(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, shooting)
 }
 
-func PlayerAwardHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	_playerId := chi.URLParam(r, "playerId")
-	playerId, playerIdErr := strconv.Atoi(_playerId)
+type PlayerAwardResponseBody struct {
+	Awards []sqlc.PlayerAward `json:"awards"`
+}
 
-	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
+type PlayerAwardResponse struct {
+	Body PlayerAwardResponseBody
+}
 
-	if playerIdErr != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Your playerId is not a number"))
-		return
-	}
+func PlayerAwardHandler(ctx context.Context, input *PlayerInput) (*PlayerAwardResponse, error) {
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
+	playerId := int32(input.PlayerId)
 
-	playerAward, err := database.Queries.GetPlayerAwards(ctx, sqlc.GetPlayerAwardsParams{PlayerID: int32(playerId), SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
-
+	playerAwards, err := database.Queries.GetPlayerAwards(ctx, sqlc.GetPlayerAwardsParams{PlayerID: playerId, SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Error doing your query"))
-		return
+		return nil, huma.Error500InternalServerError("error fetching player awards", err)
 	}
 
-	render.JSON(w, r, playerAward)
+	response := &PlayerAwardResponse{
+		Body: PlayerAwardResponseBody{Awards: playerAwards},
+	}
+	return response, nil
 }
 
 type PlayerAwardWinnersResponseBody struct {
