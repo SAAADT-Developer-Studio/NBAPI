@@ -54,7 +54,7 @@ func PlayersHandler(ctx context.Context, input *PlayersInput) (*PlayersResponse,
 	return response, nil
 }
 
-type PlayerResponse struct {
+type PlayerResponseBody struct {
 	Player   sqlc.Player            `json:"player"`
 	Totals   []sqlc.Total           `json:"totals"`
 	PerGame  []sqlc.PerGame         `json:"perGame"`
@@ -64,18 +64,19 @@ type PlayerResponse struct {
 	Shooting []sqlc.PlayerShooting  `json:"shooting"`
 }
 
-func PlayerHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
+type PlayerResponse struct {
+	Body PlayerResponseBody
+}
 
-	_playerId := chi.URLParam(r, "playerId")
-	playerId, err := strconv.Atoi(_playerId)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("invalid playerId '%d'", playerId)))
-		return
-	}
+type PlayerInput struct {
+	inputs.SeasonRangeParams
+	PlayerId int `path:"playerId" doc:"The ID of the player to fetch."`
+}
+
+func PlayerHandler(ctx context.Context, input *PlayerInput) (*PlayerResponse, error) {
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
+	playerId := int32(input.PlayerId)
 
 	player, playerErr := database.Queries.GetPlayerById(ctx, int32(playerId))
 	totals, totalsErr := database.Queries.GetPlayerTotals(ctx, sqlc.GetPlayerTotalsParams{ID: int32(playerId), SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
@@ -86,55 +87,41 @@ func PlayerHandler(w http.ResponseWriter, r *http.Request) {
 	shooting, shootingErr := database.Queries.GetPlayerShooting(ctx, sqlc.GetPlayerShootingParams{ID: int32(playerId), SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 
 	if playerErr != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error fetching player with id %d", playerId)))
-		return
+		log.Error(playerErr)
+		return nil, huma.Error500InternalServerError("error fetching player", playerErr)
 	}
 
 	if shootingErr != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error fetching player shooting with id %d", playerId)))
-		return
+		log.Error(shootingErr)
+		return nil, huma.Error500InternalServerError("error fetching player shooting", shootingErr)
 	}
 
 	if totalsErr != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error fetching player totals with id %d", playerId)))
-		return
+		log.Error(totalsErr)
+		return nil, huma.Error500InternalServerError("error fetching player totals", totalsErr)
 	}
 
 	if perGameErr != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error fetching player Per Game with id %d", playerId)))
-		return
+		log.Error(perGameErr)
+		return nil, huma.Error500InternalServerError("error fetching player Per Game", perGameErr)
 	}
 
 	if per100Err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error fetching player Per 100 possesions with id %d", playerId)))
-		return
+		log.Error(per100Err)
+		return nil, huma.Error500InternalServerError("error fetching player Per 100 possesions", per100Err)
 	}
 
 	if advancedErr != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error fetching player Advanced with id %d", playerId)))
-		return
+		log.Error(advancedErr)
+		return nil, huma.Error500InternalServerError("error fetching player Advanced", advancedErr)
 	}
 
 	if per36Err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error fetching player Per 36 with id %d", playerId)))
-		return
+		log.Error(per36Err)
+		return nil, huma.Error500InternalServerError("error fetching player Per 36", per36Err)
 	}
 
-	playerResponse := PlayerResponse{
+	playerResponse := PlayerResponseBody{
 		Player:   sqlc.Player{},
 		Totals:   []sqlc.Total{},
 		PerGame:  []sqlc.PerGame{},
@@ -163,11 +150,11 @@ func PlayerHandler(w http.ResponseWriter, r *http.Request) {
 	if len(per36) > 0 {
 		playerResponse.Per36 = per36
 	}
-	if len(per36) > 0 {
+	if len(shooting) > 0 {
 		playerResponse.Shooting = shooting
 	}
 
-	render.JSON(w, r, playerResponse)
+	return &PlayerResponse{Body: playerResponse}, nil
 }
 
 func PlayerPerGameHandler(w http.ResponseWriter, r *http.Request) {
