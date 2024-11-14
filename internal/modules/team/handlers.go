@@ -2,7 +2,7 @@ package team
 
 import (
 	"NBAPI/internal/database"
-	"NBAPI/internal/middleware"
+	"NBAPI/internal/inputs"
 	"NBAPI/internal/sqlc"
 	"context"
 	"fmt"
@@ -21,7 +21,7 @@ type TeamsResponse struct {
 }
 
 type TeamsInput struct {
-	middleware.PaginationParams
+	inputs.PaginationParams
 	Search string `query:"search" doc:"Filter results based on a search string."`
 }
 
@@ -69,7 +69,7 @@ type TeamResponse struct {
 
 type TeamInput struct {
 	Abbr string `path:"teamId" doc:"The team ID to fetch."`
-	middleware.SeasonRangeParams
+	inputs.SeasonRangeParams
 }
 
 func TeamHandler(ctx context.Context, input *TeamInput) (*TeamResponse, error) {
@@ -181,7 +181,7 @@ func TeamTotalsStatsHandler(ctx context.Context, input *TeamTotalsInput) (*TeamT
 }
 
 type TeamOpponentsTotalsResponse struct {
-	Body []sqlc.OpponentsTotal
+	Body []sqlc.GetOpponentsTotalsRow
 }
 
 type TeamOpponentsTotalsInput struct {
@@ -205,7 +205,7 @@ func TeamTotalsOpponentsHandler(ctx context.Context, input *TeamInput) (*TeamOpp
 }
 
 type TeamOpponentsPerGameResponse struct {
-	Body []sqlc.OpponentsPerGame
+	Body []sqlc.GetOpponentsPerGameRow
 }
 
 type TeamOpponentsPerGameInput struct {
@@ -230,7 +230,7 @@ func TeamPerGameOpponentsHandler(ctx context.Context, input *TeamOpponentsPerGam
 }
 
 type TeamOpponentsPer100PossResponse struct {
-	Body []sqlc.OpponentsPer100Possesion
+	Body []sqlc.GetOpponentsPer100PossesionsRow
 }
 type TeamOpponentsPer100PossInput struct {
 	TeamInput

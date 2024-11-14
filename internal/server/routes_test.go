@@ -1,15 +1,20 @@
 package server
 
 import (
-	"io"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
+type HelloWorldReponse struct {
+	Message string `json:"message"`
+	Schema  string `json:"$schema"`
+}
+
 func TestHandler(t *testing.T) {
 	s := &Server{}
-	server := httptest.NewServer(http.HandlerFunc(s.HelloWorldHandler))
+	server := httptest.NewServer(http.HandlerFunc(s.healthHandler))
 	defer server.Close()
 	resp, err := http.Get(server.URL)
 	if err != nil {
@@ -20,12 +25,15 @@ func TestHandler(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expected status OK; got %v", resp.Status)
 	}
-	expected := "{\"message\":\"Hello World\"}"
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
+	// {
+	// "$schema": "http://localhost:8080/schemas/GreetingOutputBody.json",
+	// "message": "Hello world"
+	// }
+	data := HelloWorldReponse{}
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		t.Fatalf("error reading response body. Err: %v", err)
 	}
-	if expected != string(body) {
-		t.Errorf("expected response body to be %v; got %v", expected, string(body))
+	if data.Message != "Hello world" {
+		t.Errorf("expected response body to have message 'Hello world'; got %v", data.Message)
 	}
 }
