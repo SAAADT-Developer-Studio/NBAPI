@@ -9,6 +9,132 @@ import (
 	"context"
 )
 
+const getAllStars = `-- name: GetAllStars :many
+select playerfullname, season_year, teamname, replaced from all_stars where lower(playerFullName) like '%' || lower($1) || '%'  and season_year between $2 and $3
+`
+
+type GetAllStarsParams struct {
+	Lower        string `json:"lower"`
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+}
+
+func (q *Queries) GetAllStars(ctx context.Context, arg GetAllStarsParams) ([]AllStar, error) {
+	rows, err := q.db.Query(ctx, getAllStars, arg.Lower, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []AllStar
+	for rows.Next() {
+		var i AllStar
+		if err := rows.Scan(
+			&i.Playerfullname,
+			&i.SeasonYear,
+			&i.Teamname,
+			&i.Replaced,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllTeams = `-- name: GetAllTeams :many
+SELECT player_id, season_year, type, team_number, id, fullname FROM all_teams JOIN player on player.id = all_teams.player_id and season_year BETWEEN $1 and $2
+`
+
+type GetAllTeamsParams struct {
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+type GetAllTeamsRow struct {
+	PlayerID   int32  `json:"player_id"`
+	SeasonYear int32  `json:"season_year"`
+	Type       string `json:"type"`
+	TeamNumber string `json:"team_number"`
+	ID         int32  `json:"id"`
+	Fullname   string `json:"fullname"`
+}
+
+func (q *Queries) GetAllTeams(ctx context.Context, arg GetAllTeamsParams) ([]GetAllTeamsRow, error) {
+	rows, err := q.db.Query(ctx, getAllTeams, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllTeamsRow
+	for rows.Next() {
+		var i GetAllTeamsRow
+		if err := rows.Scan(
+			&i.PlayerID,
+			&i.SeasonYear,
+			&i.Type,
+			&i.TeamNumber,
+			&i.ID,
+			&i.Fullname,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllTeamsType = `-- name: GetAllTeamsType :many
+SELECT player_id, season_year, type, team_number, id, fullname FROM all_teams JOIN player on player.id = all_teams.player_id where "type" = $1 and season_year BETWEEN $2 and $3
+`
+
+type GetAllTeamsTypeParams struct {
+	Type         string `json:"type"`
+	SeasonYear   int32  `json:"season_year"`
+	SeasonYear_2 int32  `json:"season_year_2"`
+}
+
+type GetAllTeamsTypeRow struct {
+	PlayerID   int32  `json:"player_id"`
+	SeasonYear int32  `json:"season_year"`
+	Type       string `json:"type"`
+	TeamNumber string `json:"team_number"`
+	ID         int32  `json:"id"`
+	Fullname   string `json:"fullname"`
+}
+
+func (q *Queries) GetAllTeamsType(ctx context.Context, arg GetAllTeamsTypeParams) ([]GetAllTeamsTypeRow, error) {
+	rows, err := q.db.Query(ctx, getAllTeamsType, arg.Type, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllTeamsTypeRow
+	for rows.Next() {
+		var i GetAllTeamsTypeRow
+		if err := rows.Scan(
+			&i.PlayerID,
+			&i.SeasonYear,
+			&i.Type,
+			&i.TeamNumber,
+			&i.ID,
+			&i.Fullname,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPlayerAdvanced = `-- name: GetPlayerAdvanced :many
 select advanced.id, advanced.per, advanced.ts_percent, advanced.p_ar3, advanced.f_tr, advanced.orb_percent, advanced.drb_percent, advanced.trb_percent, advanced.ast_percent, advanced.stl_percent, advanced.blk_percent, advanced.tov_percent, advanced.usg_percent, advanced.ows, advanced.dws, advanced.ws, advanced.ws48, advanced.obpm, advanced.dbpm, advanced.bpm, advanced.vorp from player
   inner join player_advanced on player.id = player_advanced.player_id
@@ -54,6 +180,134 @@ func (q *Queries) GetPlayerAdvanced(ctx context.Context, arg GetPlayerAdvancedPa
 			&i.Dbpm,
 			&i.Bpm,
 			&i.Vorp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerAllTeams = `-- name: GetPlayerAllTeams :many
+SELECT player_id, season_year, type, team_number, id, fullname FROM all_teams JOIN player on player.id = all_teams.player_id where player_id = $1 and season_year BETWEEN $2 and $3
+`
+
+type GetPlayerAllTeamsParams struct {
+	PlayerID     int32 `json:"player_id"`
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+type GetPlayerAllTeamsRow struct {
+	PlayerID   int32  `json:"player_id"`
+	SeasonYear int32  `json:"season_year"`
+	Type       string `json:"type"`
+	TeamNumber string `json:"team_number"`
+	ID         int32  `json:"id"`
+	Fullname   string `json:"fullname"`
+}
+
+func (q *Queries) GetPlayerAllTeams(ctx context.Context, arg GetPlayerAllTeamsParams) ([]GetPlayerAllTeamsRow, error) {
+	rows, err := q.db.Query(ctx, getPlayerAllTeams, arg.PlayerID, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPlayerAllTeamsRow
+	for rows.Next() {
+		var i GetPlayerAllTeamsRow
+		if err := rows.Scan(
+			&i.PlayerID,
+			&i.SeasonYear,
+			&i.Type,
+			&i.TeamNumber,
+			&i.ID,
+			&i.Fullname,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerAwardWinners = `-- name: GetPlayerAwardWinners :many
+SELECT player_id, season_year, award, pts_won, pts_max, share, winner
+FROM player_awards as pa
+WHERE (pa.season_year, pa.award, pa.share) IN (
+    SELECT season_year, award, MAX(share) AS max_share
+    FROM player_awards px
+    GROUP BY px.season_year, px.award
+    HAVING px.season_year BETWEEN $1 AND $2
+)
+`
+
+type GetPlayerAwardWinnersParams struct {
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+func (q *Queries) GetPlayerAwardWinners(ctx context.Context, arg GetPlayerAwardWinnersParams) ([]PlayerAward, error) {
+	rows, err := q.db.Query(ctx, getPlayerAwardWinners, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PlayerAward
+	for rows.Next() {
+		var i PlayerAward
+		if err := rows.Scan(
+			&i.PlayerID,
+			&i.SeasonYear,
+			&i.Award,
+			&i.PtsWon,
+			&i.PtsMax,
+			&i.Share,
+			&i.Winner,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerAwards = `-- name: GetPlayerAwards :many
+SELECT player_id, season_year, award, pts_won, pts_max, share, winner FROM player_awards where player_id = $1 and season_year BETWEEN $2 and $3
+`
+
+type GetPlayerAwardsParams struct {
+	PlayerID     int32 `json:"player_id"`
+	SeasonYear   int32 `json:"season_year"`
+	SeasonYear_2 int32 `json:"season_year_2"`
+}
+
+func (q *Queries) GetPlayerAwards(ctx context.Context, arg GetPlayerAwardsParams) ([]PlayerAward, error) {
+	rows, err := q.db.Query(ctx, getPlayerAwards, arg.PlayerID, arg.SeasonYear, arg.SeasonYear_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PlayerAward
+	for rows.Next() {
+		var i PlayerAward
+		if err := rows.Scan(
+			&i.PlayerID,
+			&i.SeasonYear,
+			&i.Award,
+			&i.PtsWon,
+			&i.PtsMax,
+			&i.Share,
+			&i.Winner,
 		); err != nil {
 			return nil, err
 		}

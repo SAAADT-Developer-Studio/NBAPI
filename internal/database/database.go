@@ -63,6 +63,7 @@ func Init() {
 	logrus.Info("Connecting to database ", connStr)
 
 	pgxLogger := logrus.New()
+	pgxLogger.Level = logrus.FatalLevel //todo use env variable
 	tracer := &PgTracer{logger: pgxLogger}
 
 	config, err := pgxpool.ParseConfig(connStr)

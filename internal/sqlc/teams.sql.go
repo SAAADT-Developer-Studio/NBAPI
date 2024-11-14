@@ -12,7 +12,7 @@ import (
 )
 
 const getOpponentsPer100Possesions = `-- name: GetOpponentsPer100Possesions :many
-select team_abbr, per_100_id, season_year from opponents_per_100_possesions where team_abbr = $1 and season_year between $2 and $3 order by season_year desc
+select team_abbr, per_100_id, season_year, id, fg, fga, p3, pa3, p2, pa2, ft, fta, orb, drb, trb, stl, blk, ast, tov, pf, pts, o_rtg, d_rtg from opponents_per_100_possesions join per_100_possesions on per_100_possesions.id = opponents_per_100_possesions.per_100_id where team_abbr = $1 and season_year between $2 and $3 order by season_year desc
 `
 
 type GetOpponentsPer100PossesionsParams struct {
@@ -21,16 +21,66 @@ type GetOpponentsPer100PossesionsParams struct {
 	SeasonYear_2 int32  `json:"season_year_2"`
 }
 
-func (q *Queries) GetOpponentsPer100Possesions(ctx context.Context, arg GetOpponentsPer100PossesionsParams) ([]OpponentsPer100Possesion, error) {
+type GetOpponentsPer100PossesionsRow struct {
+	TeamAbbr   string        `json:"team_abbr"`
+	Per100ID   int32         `json:"per_100_id"`
+	SeasonYear int32         `json:"season_year"`
+	ID         int32         `json:"id"`
+	Fg         float32       `json:"fg"`
+	Fga        float32       `json:"fga"`
+	P3         float32       `json:"p3"`
+	Pa3        float32       `json:"pa3"`
+	P2         float32       `json:"p2"`
+	Pa2        float32       `json:"pa2"`
+	Ft         float32       `json:"ft"`
+	Fta        float32       `json:"fta"`
+	Orb        float32       `json:"orb"`
+	Drb        float32       `json:"drb"`
+	Trb        float32       `json:"trb"`
+	Stl        float32       `json:"stl"`
+	Blk        float32       `json:"blk"`
+	Ast        float32       `json:"ast"`
+	Tov        float32       `json:"tov"`
+	Pf         float32       `json:"pf"`
+	Pts        float32       `json:"pts"`
+	ORtg       pgtype.Float4 `json:"o_rtg"`
+	DRtg       pgtype.Float4 `json:"d_rtg"`
+}
+
+func (q *Queries) GetOpponentsPer100Possesions(ctx context.Context, arg GetOpponentsPer100PossesionsParams) ([]GetOpponentsPer100PossesionsRow, error) {
 	rows, err := q.db.Query(ctx, getOpponentsPer100Possesions, arg.TeamAbbr, arg.SeasonYear, arg.SeasonYear_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []OpponentsPer100Possesion
+	var items []GetOpponentsPer100PossesionsRow
 	for rows.Next() {
-		var i OpponentsPer100Possesion
-		if err := rows.Scan(&i.TeamAbbr, &i.Per100ID, &i.SeasonYear); err != nil {
+		var i GetOpponentsPer100PossesionsRow
+		if err := rows.Scan(
+			&i.TeamAbbr,
+			&i.Per100ID,
+			&i.SeasonYear,
+			&i.ID,
+			&i.Fg,
+			&i.Fga,
+			&i.P3,
+			&i.Pa3,
+			&i.P2,
+			&i.Pa2,
+			&i.Ft,
+			&i.Fta,
+			&i.Orb,
+			&i.Drb,
+			&i.Trb,
+			&i.Stl,
+			&i.Blk,
+			&i.Ast,
+			&i.Tov,
+			&i.Pf,
+			&i.Pts,
+			&i.ORtg,
+			&i.DRtg,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -42,7 +92,7 @@ func (q *Queries) GetOpponentsPer100Possesions(ctx context.Context, arg GetOppon
 }
 
 const getOpponentsPerGame = `-- name: GetOpponentsPerGame :many
-select team_abbr, per_game_id, season_year from opponents_per_game where team_abbr = $1 and season_year between $2 and $3 order by season_year desc
+select team_abbr, per_game_id, season_year, id, mp, fg, fga, fg_percent, p3, pa3, p_percent3, p2, pa2, p_percent2, efg_percent, ft, fta, ft_percent, orb, drb, trb, ast, stl, blk, tov, pf, pts from opponents_per_game join per_game on opponents_per_game.per_game_id = per_game.id where team_abbr = $1 and season_year between $2 and $3 order by season_year desc
 `
 
 type GetOpponentsPerGameParams struct {
@@ -51,16 +101,74 @@ type GetOpponentsPerGameParams struct {
 	SeasonYear_2 int32  `json:"season_year_2"`
 }
 
-func (q *Queries) GetOpponentsPerGame(ctx context.Context, arg GetOpponentsPerGameParams) ([]OpponentsPerGame, error) {
+type GetOpponentsPerGameRow struct {
+	TeamAbbr   string  `json:"team_abbr"`
+	PerGameID  int32   `json:"per_game_id"`
+	SeasonYear int32   `json:"season_year"`
+	ID         int32   `json:"id"`
+	Mp         float32 `json:"mp"`
+	Fg         float32 `json:"fg"`
+	Fga        float32 `json:"fga"`
+	FgPercent  float32 `json:"fg_percent"`
+	P3         float32 `json:"p3"`
+	Pa3        float32 `json:"pa3"`
+	PPercent3  float32 `json:"p_percent3"`
+	P2         float32 `json:"p2"`
+	Pa2        float32 `json:"pa2"`
+	PPercent2  float32 `json:"p_percent2"`
+	EfgPercent float32 `json:"efg_percent"`
+	Ft         float32 `json:"ft"`
+	Fta        float32 `json:"fta"`
+	FtPercent  float32 `json:"ft_percent"`
+	Orb        float32 `json:"orb"`
+	Drb        float32 `json:"drb"`
+	Trb        float32 `json:"trb"`
+	Ast        float32 `json:"ast"`
+	Stl        float32 `json:"stl"`
+	Blk        float32 `json:"blk"`
+	Tov        float32 `json:"tov"`
+	Pf         float32 `json:"pf"`
+	Pts        float32 `json:"pts"`
+}
+
+func (q *Queries) GetOpponentsPerGame(ctx context.Context, arg GetOpponentsPerGameParams) ([]GetOpponentsPerGameRow, error) {
 	rows, err := q.db.Query(ctx, getOpponentsPerGame, arg.TeamAbbr, arg.SeasonYear, arg.SeasonYear_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []OpponentsPerGame
+	var items []GetOpponentsPerGameRow
 	for rows.Next() {
-		var i OpponentsPerGame
-		if err := rows.Scan(&i.TeamAbbr, &i.PerGameID, &i.SeasonYear); err != nil {
+		var i GetOpponentsPerGameRow
+		if err := rows.Scan(
+			&i.TeamAbbr,
+			&i.PerGameID,
+			&i.SeasonYear,
+			&i.ID,
+			&i.Mp,
+			&i.Fg,
+			&i.Fga,
+			&i.FgPercent,
+			&i.P3,
+			&i.Pa3,
+			&i.PPercent3,
+			&i.P2,
+			&i.Pa2,
+			&i.PPercent2,
+			&i.EfgPercent,
+			&i.Ft,
+			&i.Fta,
+			&i.FtPercent,
+			&i.Orb,
+			&i.Drb,
+			&i.Trb,
+			&i.Ast,
+			&i.Stl,
+			&i.Blk,
+			&i.Tov,
+			&i.Pf,
+			&i.Pts,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -72,7 +180,7 @@ func (q *Queries) GetOpponentsPerGame(ctx context.Context, arg GetOpponentsPerGa
 }
 
 const getOpponentsTotals = `-- name: GetOpponentsTotals :many
-select team_abbr, total_id, season_year from opponents_totals where team_abbr = $1 and season_year between $2 and $3 order by season_year desc
+select team_abbr, total_id, season_year, id, gp, gs, mp, fg, fga, p3, pa3, p2, pa2, ft, fta, orb, drb, trb, stl, blk, ast, tov, pf, pts from opponents_totals join totals on opponents_totals.total_id = totals.id where team_abbr = $1 and season_year between $2 and $3 order by season_year desc
 `
 
 type GetOpponentsTotalsParams struct {
@@ -81,16 +189,68 @@ type GetOpponentsTotalsParams struct {
 	SeasonYear_2 int32  `json:"season_year_2"`
 }
 
-func (q *Queries) GetOpponentsTotals(ctx context.Context, arg GetOpponentsTotalsParams) ([]OpponentsTotal, error) {
+type GetOpponentsTotalsRow struct {
+	TeamAbbr   string      `json:"team_abbr"`
+	TotalID    int32       `json:"total_id"`
+	SeasonYear int32       `json:"season_year"`
+	ID         int32       `json:"id"`
+	Gp         int32       `json:"gp"`
+	Gs         pgtype.Int4 `json:"gs"`
+	Mp         int32       `json:"mp"`
+	Fg         int32       `json:"fg"`
+	Fga        int32       `json:"fga"`
+	P3         int32       `json:"p3"`
+	Pa3        int32       `json:"pa3"`
+	P2         int32       `json:"p2"`
+	Pa2        int32       `json:"pa2"`
+	Ft         int32       `json:"ft"`
+	Fta        int32       `json:"fta"`
+	Orb        int32       `json:"orb"`
+	Drb        int32       `json:"drb"`
+	Trb        int32       `json:"trb"`
+	Stl        int32       `json:"stl"`
+	Blk        int32       `json:"blk"`
+	Ast        int32       `json:"ast"`
+	Tov        int32       `json:"tov"`
+	Pf         int32       `json:"pf"`
+	Pts        int32       `json:"pts"`
+}
+
+func (q *Queries) GetOpponentsTotals(ctx context.Context, arg GetOpponentsTotalsParams) ([]GetOpponentsTotalsRow, error) {
 	rows, err := q.db.Query(ctx, getOpponentsTotals, arg.TeamAbbr, arg.SeasonYear, arg.SeasonYear_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []OpponentsTotal
+	var items []GetOpponentsTotalsRow
 	for rows.Next() {
-		var i OpponentsTotal
-		if err := rows.Scan(&i.TeamAbbr, &i.TotalID, &i.SeasonYear); err != nil {
+		var i GetOpponentsTotalsRow
+		if err := rows.Scan(
+			&i.TeamAbbr,
+			&i.TotalID,
+			&i.SeasonYear,
+			&i.ID,
+			&i.Gp,
+			&i.Gs,
+			&i.Mp,
+			&i.Fg,
+			&i.Fga,
+			&i.P3,
+			&i.Pa3,
+			&i.P2,
+			&i.Pa2,
+			&i.Ft,
+			&i.Fta,
+			&i.Orb,
+			&i.Drb,
+			&i.Trb,
+			&i.Stl,
+			&i.Blk,
+			&i.Ast,
+			&i.Tov,
+			&i.Pf,
+			&i.Pts,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -194,11 +354,11 @@ type GetTeamPerGameRow struct {
 	Fg         float32 `json:"fg"`
 	Fga        float32 `json:"fga"`
 	FgPercent  float32 `json:"fg_percent"`
-	P3         int32   `json:"p3"`
-	Pa3        int32   `json:"pa3"`
+	P3         float32 `json:"p3"`
+	Pa3        float32 `json:"pa3"`
 	PPercent3  float32 `json:"p_percent3"`
-	P2         int32   `json:"p2"`
-	Pa2        int32   `json:"pa2"`
+	P2         float32 `json:"p2"`
+	Pa2        float32 `json:"pa2"`
 	PPercent2  float32 `json:"p_percent2"`
 	EfgPercent float32 `json:"efg_percent"`
 	Ft         float32 `json:"ft"`
