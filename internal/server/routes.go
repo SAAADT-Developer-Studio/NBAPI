@@ -51,29 +51,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	huma.Get(api, "/", s.HelloWorldHandler)
 	r.Route("/players", player.Router)
-	r.Route("/teams", team.Router)
+	team.RegisterRoutes(api)
 
 	r.Get("/health", s.healthHandler)
 
-	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(`<!doctype html>
-<html>
-  <head>
-    <title>API Reference</title>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1" />
-  </head>
-  <body>
-    <script
-      id="api-reference"
-      data-url="/openapi.json"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-  </body>
-</html>`))
-	})
+	r.Get("/docs", s.DocsHandler)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
@@ -103,4 +85,24 @@ func (s *Server) HelloWorldHandler(ctx context.Context, input *struct{}) (*Greet
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResp, _ := json.Marshal(database.Health())
 	_, _ = w.Write(jsonResp)
+}
+
+func (s *Server) DocsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(`<!doctype html>
+<html>
+  <head>
+    <title>API Reference</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <script
+      id="api-reference"
+      data-url="/openapi.json"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  </body>
+</html>`))
 }
