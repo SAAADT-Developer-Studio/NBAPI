@@ -373,21 +373,31 @@ func PlayerAwardHandler(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, playerAward)
 }
 
-func PlayerAwardWinnerHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
+type PlayerAwardWinnersResponseBody struct {
+	Awards []sqlc.PlayerAward `json:"awards"`
+}
 
-	awards, err := database.Queries.GetPlayerAwardWinners(r.Context(), sqlc.GetPlayerAwardWinnersParams{SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
+type PlayerAwardWinnersResponse struct {
+	Body PlayerAwardWinnersResponseBody
+}
 
+type PlayerAwardWinnersInput struct {
+	inputs.SeasonRangeParams
+}
+
+func PlayerAwardWinnerHandler(ctx context.Context, input *PlayerAwardWinnersInput) (*PlayerAwardWinnersResponse, error) {
+	seasonFrom := int32(input.SeasonFrom)
+	seasonTo := int32(input.SeasonTo)
+
+	awards, err := database.Queries.GetPlayerAwardWinners(ctx, sqlc.GetPlayerAwardWinnersParams{SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Error doing your query"))
-		return
+		return nil, err
 	}
 
-	render.JSON(w, r, awards)
-
+	response := &PlayerAwardWinnersResponse{
+		Body: PlayerAwardWinnersResponseBody{Awards: awards},
+	}
+	return response, nil
 }
 
 func AllTeamPlayerHandler(w http.ResponseWriter, r *http.Request) {

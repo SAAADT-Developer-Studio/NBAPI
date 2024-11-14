@@ -24,12 +24,12 @@ func RegisterRoutes(api huma.API) {
 		Summary: "List all-star players",
 	}, AllStarHandler)
 
-	// huma.Register(api, huma.Operation{
-	// 	Method:  http.MethodGet,
-	// 	Path:    "/players/awards",
-	// 	Tags:    []string{"players"},
-	// 	Summary: "List player award winners",
-	// }, PlayerAwardWinnerHandler)
+	huma.Register(api, huma.Operation{
+		Method:  http.MethodGet,
+		Path:    "/players/awards",
+		Tags:    []string{"players"},
+		Summary: "List player award winners",
+	}, PlayerAwardWinnerHandler)
 
 	// huma.Register(api, huma.Operation{
 	// 	Method:  http.MethodGet,
@@ -113,7 +113,7 @@ func Router(router chi.Router) {
 	router.Use(inputs.SeasonYearMiddleware)
 	// router.Get("/", PlayersHandler)
 	// router.Get("/all-stars", AllStarHandler)
-	router.Get("/awards", PlayerAwardWinnerHandler)
+	// router.Get("/awards", PlayerAwardWinnerHandler)
 	router.Route("/all-teams", func(r chi.Router) {
 		r.Get("/", AllTeamHandler)
 		r.Get("/{awardType}", AllTeamTypeHandler)
