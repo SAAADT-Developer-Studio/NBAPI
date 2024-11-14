@@ -1,7 +1,7 @@
 package player
 
 import (
-	"NBAPI/internal/middleware"
+	"NBAPI/internal/inputs"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -18,8 +18,7 @@ func RegisterRoutes(api huma.API) {
 }
 
 func Router(router chi.Router) {
-	router.Use(middleware.SeasonYearMiddleware)
-	router.Use(middleware.Pagination)
+	router.Use(inputs.SeasonYearMiddleware)
 	// router.Get("/", PlayersHandler)
 	router.Get("/all-stars", AllStarHandler)
 	router.Get("/awards", PlayerAwardWinnerHandler)

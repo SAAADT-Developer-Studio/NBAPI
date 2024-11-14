@@ -2,7 +2,7 @@ package team
 
 import (
 	"NBAPI/internal/database"
-	"NBAPI/internal/middleware"
+	"NBAPI/internal/inputs"
 	"NBAPI/internal/sqlc"
 	"context"
 	"fmt"
@@ -21,7 +21,7 @@ type TeamsResponse struct {
 }
 
 type TeamsInput struct {
-	middleware.PaginationParams
+	inputs.PaginationParams
 	Search string `query:"search" doc:"Filter results based on a search string."`
 }
 
@@ -69,7 +69,7 @@ type TeamResponse struct {
 
 type TeamInput struct {
 	Abbr string `path:"teamId" doc:"The team ID to fetch."`
-	middleware.SeasonRangeParams
+	inputs.SeasonRangeParams
 }
 
 func TeamHandler(ctx context.Context, input *TeamInput) (*TeamResponse, error) {

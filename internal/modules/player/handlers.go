@@ -2,7 +2,7 @@ package player
 
 import (
 	"NBAPI/internal/database"
-	"NBAPI/internal/middleware"
+	"NBAPI/internal/inputs"
 	"NBAPI/internal/sqlc"
 	"context"
 	"fmt"
@@ -25,7 +25,7 @@ type PlayersResponse struct {
 }
 
 type PlayersInput struct {
-	middleware.PaginationParams
+	inputs.PaginationParams
 	Cursor int    `query:"pageCursor" default:"0" doc:"Page cursor for pagination."`
 	Search string `query:"search" doc:"Filter results based on a search string."`
 }
@@ -64,8 +64,8 @@ type PlayerResponse struct {
 
 func PlayerHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	_playerId := chi.URLParam(r, "playerId")
 	playerId, err := strconv.Atoi(_playerId)
@@ -179,8 +179,8 @@ func PlayerPerGameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	ppg, err := database.Queries.GetPlayerPerGame(ctx, sqlc.GetPlayerPerGameParams{
 		ID:           int32(playerId),
@@ -209,8 +209,8 @@ func PlayerPer100Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	per100, err := database.Queries.GetPlayerPer100(ctx, sqlc.GetPlayerPer100Params{
 		ID:           int32(playerId),
@@ -239,8 +239,8 @@ func PlayerTotalsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	totals, err := database.Queries.GetPlayerTotals(ctx, sqlc.GetPlayerTotalsParams{
 		ID:           int32(playerId),
@@ -269,8 +269,8 @@ func PlayerPer36Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	per36, err := database.Queries.GetPlayerPer36(ctx, sqlc.GetPlayerPer36Params{
 		ID:           int32(playerId),
@@ -299,8 +299,8 @@ func PlayerAdvancedHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	advanced, err := database.Queries.GetPlayerAdvanced(ctx, sqlc.GetPlayerAdvancedParams{
 		ID:           int32(playerId),
@@ -329,8 +329,8 @@ func PlayerShootingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	shooting, err := database.Queries.GetPlayerShooting(ctx, sqlc.GetPlayerShootingParams{
 		ID:           int32(playerId),
@@ -353,8 +353,8 @@ func PlayerAwardHandler(w http.ResponseWriter, r *http.Request) {
 	_playerId := chi.URLParam(r, "playerId")
 	playerId, playerIdErr := strconv.Atoi(_playerId)
 
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	if playerIdErr != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -375,8 +375,8 @@ func PlayerAwardHandler(w http.ResponseWriter, r *http.Request) {
 
 func PlayerAwardWinnerHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	awards, err := database.Queries.GetPlayerAwardWinners(r.Context(), sqlc.GetPlayerAwardWinnersParams{SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 
@@ -401,8 +401,8 @@ func AllTeamPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	allTeamPlayer, err := database.Queries.GetPlayerAllTeams(r.Context(), sqlc.GetPlayerAllTeamsParams{PlayerID: int32(playerId), SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 	if err != nil {
@@ -417,8 +417,8 @@ func AllTeamPlayerHandler(w http.ResponseWriter, r *http.Request) {
 
 func AllTeamHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 
 	allTeams, err := database.Queries.GetAllTeams(r.Context(), sqlc.GetAllTeamsParams{SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
 	if err != nil {
@@ -442,8 +442,8 @@ func includes(arr []string, element string) bool {
 
 func AllTeamTypeHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 	awardType := chi.URLParam(r, "awardType")
 
 	allowedAwardTypes :=
@@ -473,8 +473,8 @@ func AllTeamTypeHandler(w http.ResponseWriter, r *http.Request) {
 
 func AllStarHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	seasonFrom := int32(ctx.Value(middleware.SeasonFromKey).(int))
-	seasonTo := int32(ctx.Value(middleware.SeasonToKey).(int))
+	seasonFrom := int32(ctx.Value(inputs.SeasonFromKey).(int))
+	seasonTo := int32(ctx.Value(inputs.SeasonToKey).(int))
 	search := r.URL.Query().Get("search")
 
 	allStars, err := database.Queries.GetAllStars(r.Context(), sqlc.GetAllStarsParams{Lower: search, SeasonYear: seasonFrom, SeasonYear_2: seasonTo})
