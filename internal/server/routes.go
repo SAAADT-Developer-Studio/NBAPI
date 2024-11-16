@@ -12,12 +12,10 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
+	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
-	httprateredis "github.com/go-chi/httprate-redis"
-
-	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -27,9 +25,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 		100,
 		time.Minute,
 		httprate.WithKeyByIP(),
-		httprateredis.WithRedisLimitCounter(&httprateredis.Config{
-			Host: config.Config.RedisHost, Port: 6379,
-		}),
 	))
 
 	r.Use(middleware.RequestID)
