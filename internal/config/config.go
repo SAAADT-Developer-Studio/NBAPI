@@ -14,8 +14,6 @@ type AppConfig struct {
 	DBPassword string `koanf:"DB_PASSWORD" validate:"required"`
 	DBHost     string `koanf:"DB_HOST" validate:"required,hostname"`
 	DBPort     string `koanf:"DB_PORT" validate:"required,number"`
-	RedisHost  string `koanf:"REDIS_HOST" validate:"required,hostname"`
-	RedisPort  int    `koanf:"REDIS_PORT" validate:"required,number"`
 }
 
 var validate *validator.Validate
